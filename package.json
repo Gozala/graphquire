@@ -1,0 +1,25 @@
+{
+    "name": "graphquire",
+    "description": "Module dependency visualizer",
+    "version": "0.1",
+    "maintainers": [
+        {
+            "name": "Irakli Gozalishvili",
+            "email": "Irakli.Gozalishvili@tomtom.com",
+            "web": "http://rfobic.wordpress.com/"
+        }
+    ],
+    "contributors": [
+        {
+            "name": "Irakli Gozalishvili",
+            "email": "Irakli.Gozalishvili@tomtom.com",
+            "web": "http://rfobic.wordpress.com/"
+        }
+    ],
+    "licenses": [],
+    "repositories": [],
+    "directories": {
+        "lib": "lib",
+        "resources": "resources"
+    }
+}
