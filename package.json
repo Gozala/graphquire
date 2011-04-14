@@ -1,0 +1,35 @@
+{ "name": "graphquire",
+  "version": "0.0.1",
+  "description": "Require graph builder.",
+  "keywords": [],
+  "author": "Irakli Gozalishvili <rfobic@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Gozala/graphquire.git",
+    "web": "https://github.com/Gozala/graphquire"
+  },
+  "bugs": {
+    "web": "http://github.com/Gozala/graphquire/issues/"
+  },
+  "directories": {
+    "doc": "./docs",
+    "lib": "./lib",
+    "test": "./test"
+  },
+  "devDependencies": {
+    "test": ">=0.0.10"
+  },
+  "main": "./lib/graphquire.js",
+  "engines": {
+    "node": "0.4.x",
+    "teleport": ">=0.2.0"
+  },
+  "bin": { "graphquire" : "./bin/graphquire.coffee" },
+  "scripts": {
+    "test": "node test/test-graphquire.js"
+  },
+  "licenses": [ { "type" : "MPL 1.1/LGPL 2.1/GPL 2.0"
+    , "url" : "http://www.mozilla.org/MPL/"
+    }
+  ]
+}
