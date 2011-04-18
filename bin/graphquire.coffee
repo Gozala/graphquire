@@ -2,8 +2,12 @@
 ### vim:set ts=2 sw=2 sts=2 et autoread: ###
 
 graphquire = require '../graphquire'
-process.stdin.resume yes
-process.stdin.setEncoding 'utf8'
+fs = require 'fs'
+path = require 'path'
 
-process.stdin.on 'data', (content) ->
-  process.stdout.write graphquire.depends(content).join('\n')
+program = path.join process.cwd(), process.argv[2]
+
+console.log "Creating require graph for -> #{program}"
+
+fs.readFile program, (error, source) ->
+  console.log(graphquire.depends(source))
