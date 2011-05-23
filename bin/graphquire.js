@@ -1,11 +1,15 @@
-(function() {
-  /* vim:set ts=2 sw=2 sts=2 et autoread: */  var fs, graphquire, path, program;
-  graphquire = require('../graphquire');
-  fs = require('fs');
-  path = require('path');
-  program = path.join(process.cwd(), process.argv[2]);
-  console.log("Creating require graph for -> " + program);
-  fs.readFile(program, function(error, source) {
-    return console.log(graphquire.depends(source));
-  });
-}).call(this);
+#!/usr/bin/env node
+
+/* vim:set ts=2 sw=2 sts=2 expandtab */
+/*jshint asi: true undef: true es5: true node: true devel: true
+         forin: true latedef: false globalstrict: true */
+/*global define: true */
+
+'use strict';
+
+var graphquire = require('../graphquire')
+
+graphquire.getGraph(process.argv[2], function(error, graph) {
+  if (error) console.error(error)
+  else console.log(JSON.stringify(graph, '', '  '))
+})
