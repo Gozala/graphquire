@@ -47,10 +47,13 @@ function resolveID(id, base) {
 function resolveURI(uri, base) {
   return normalizeURI(resolveID(uri, base))
 }
+function resolvePluginURI(id) {
+  return extractPluginName(id) + '://' + normalizeURI(extractURI(id))
+}
 
-
-function resolveRequirements(program, module, callback) {
-  fs.readFile(module.uri, function(error, source) {
+function resolveRequirements(program, requirer, callback) {
+  var filename = path.join(path.dirname(program.path), requirer.path)
+  fs.readFile(filename, function(error, source) {
     if (error) return callback(error)
 
     // Searching for dependencies.
@@ -60,30 +63,36 @@ function resolveRequirements(program, module, callback) {
     // dependencies are resolved.
     function next(error) {
       if (error) return callback(error)
-      if (Object.keys(module.requirements).length === dependencies.length)
+      if (Object.keys(requirer.requirements).length === dependencies.length)
         callback(null, program)
     }
 
     next()
 
     dependencies.forEach(function onDependency(dependencyID) {
-      var id = resolveID(dependencyID, module.id)
-      var dependency = {
-        id: id,
-        uri: isPluginURI(id) ? normalizeURI(path.join(program.cacheURI, id))
-                             : resolveURI(id, module.uri),
-        requirements: {}
-      }
-      module.requirements[dependencyID] = dependency.id
-      program.modules[dependency.id] = dependency
-      resolveRequirements(program, dependency, next)
+      var id, uri, module;
+      module = {}
+      id = module.id = resolveID(dependencyID, requirer.id)
+      module.path = isPluginURI(id) ?
+                    normalizeURI(path.join(program.cacheURI, id)) :
+                    resolveURI(id, requirer.path)
+
+      if (isPluginURI(id))
+        module.uri = resolvePluginURI(id)
+
+      module.requirements = {}
+
+      requirer.requirements[dependencyID] = id
+      program.modules[id] = module
+
+      resolveRequirements(program, module, next)
     })
   })
 }
 exports.resolveRequirements = resolveRequirements
 
-function getMetadata(uri, callback) {
-  fs.readFile(uri, function onRead(error, data) {
+function getMetadata(path, callback) {
+  fs.readFile(path, function onRead(error, data) {
     if (error) return callback(error)
     try {
       callback(null, JSON.parse(data))
@@ -94,15 +103,16 @@ function getMetadata(uri, callback) {
 }
 exports.getMetadata = getMetadata
 
-function getGraph(uri, callback) {
-  getMetadata(uri, function onMetadata(error, metadata) {
+function getGraph(filename, callback) {
+  getMetadata(filename, function onMetadata(error, metadata) {
     if (error) return callback(error)
 
-    metadata.cacheURI = path.join(path.dirname(uri), 'node_modules')
+    metadata.cacheURI = './node_modules'
+    metadata.path = filename
     metadata.modules = {}
     resolveRequirements(metadata, (metadata.modules[metadata.name] = {
       id: metadata.name,
-      uri: normalizeURI(metadata.main || "./index.js", uri),
+      path: normalizeURI(metadata.main || "./index.js", filename),
       requirements: {}
     }), callback)
   })
