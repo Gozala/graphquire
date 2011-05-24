@@ -10,6 +10,6 @@
 var graphquire = require('../graphquire')
 
 graphquire.getGraph(process.argv[2], function(error, graph) {
-  if (error) console.error(error)
+  if (error) console.trace(error)
   else console.log(JSON.stringify(graph, '', '  '))
 })
