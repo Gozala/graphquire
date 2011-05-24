@@ -7,6 +7,7 @@
 
 var path = require('path')
 var fs = require('fs')
+var http = require('http')
 
 var COMMENT_PATTERN = /(\/\*[\s\S]*?\*\/)|((^|\n)[^('|"|\n)]*\/\/[^\n]*)/g
 var REQUIRE_PATTERN = /require\s*\(['"]([\w\W]*?)['"]\s*\)/g
@@ -48,8 +49,7 @@ function resolveURI(uri, base) {
 }
 
 
-function resolveRequirements(module, callback, program) {
-  program = program || module
+function resolveRequirements(program, module, callback) {
   fs.readFile(module.uri, function(error, source) {
     if (error) return callback(error)
 
@@ -75,8 +75,8 @@ function resolveRequirements(module, callback, program) {
         requirements: {}
       }
       module.requirements[dependencyID] = dependency.id
-      program.dependencies[dependency.id] = dependency
-      resolveRequirements(dependency, next, program)
+      program.modules[dependency.id] = dependency
+      resolveRequirements(program, dependency, next)
     })
   })
 }
@@ -98,15 +98,13 @@ function getGraph(uri, callback) {
   getMetadata(uri, function onMetadata(error, metadata) {
     if (error) return callback(error)
 
-    resolveRequirements({
-      name: metadata.name,
-      version: metadata.version,
-      description: metadata.description,
+    metadata.cacheURI = path.join(path.dirname(uri), 'node_modules')
+    metadata.modules = {}
+    resolveRequirements(metadata, (metadata.modules[metadata.name] = {
+      id: metadata.name,
       uri: normalizeURI(metadata.main || "./index.js", uri),
-      cacheURI: path.join(path.dirname(uri), 'node_modules'),
-      requirements: {},
-      dependencies: {}
-    }, callback)
+      requirements: {}
+    }), callback)
   })
 }
 exports.getGraph = getGraph
