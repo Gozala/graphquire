@@ -8,6 +8,8 @@
 var path = require('path')
 var fs = require('fs')
 var http = require('http')
+var https = require('https')
+var url = require('url')
 
 var COMMENT_PATTERN = /(\/\*[\s\S]*?\*\/)|((^|\n)[^('|"|\n)]*\/\/[^\n]*)/g
 var REQUIRE_PATTERN = /require\s*\(['"]([\w\W]*?)['"]\s*\)/g
@@ -50,10 +52,31 @@ function resolveURI(uri, base) {
 function resolvePluginURI(id) {
   return extractPluginName(id) + '://' + normalizeURI(extractURI(id))
 }
+function downloadFile(path, uri, callback) {
+  uri = url.parse(uri)
+  uri.path = uri.pathname
+  var get = uri.protocol === 'http:' ? http.get : https.get
+  get(uri, function onResponse(response) {
+    response.on('data', function onData(buffer) {
+      // TODO: We need to make path and write buffer into it.
+      callback(null, buffer)
+      /*fs.writeFile(path, buffer, function onWrite(error) {
+        callback(error, buffer)
+      })*/
+    })
+    response.on('error', callback)
+  }).on('error', callback)
+}
+function getSource(program, module, callback) {
+  var filename = path.join(path.dirname(program.path), module.path)
+  fs.stat(filename, function onStat(error) {
+    if (error) downloadFile(filename, module.uri, callback)
+    else fs.readFile(filename, callback)
+  })
+}
 
 function resolveRequirements(program, requirer, callback) {
-  var filename = path.join(path.dirname(program.path), requirer.path)
-  fs.readFile(filename, function(error, source) {
+  getSource(program, requirer, function(error, source) {
     if (error) return callback(error)
 
     // Searching for dependencies.
