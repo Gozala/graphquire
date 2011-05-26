@@ -4,13 +4,13 @@ Module graph builder. This tool may be used to build module dependency graph
 starting form package's main module. This prototype recognizes two types of
 module ids:
 
-  1. Relative:
-     `require('./foo/bar')`
-     `require('./bla.js')`
+  1. Relative:  
+     `require('./foo/bar')`  
+     `require('./bla.js')`  
      `require('../baz')`
 
-  2. Absolute:
-     `require('http!foo.org/bar')`
+  2. Absolute:  
+     `require('http!foo.org/bar')`  
      `require('https!bla.org/baz.js)`
 
 Notice `http!` prefix in absolute id ? That's a way to define remote
