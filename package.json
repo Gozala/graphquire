@@ -1,22 +1,17 @@
 {
   "name": "graphquire",
   "id": "graphquire",
-  "version": "0.0.1",
-  "description": "Require graph builder.",
-  "keywords": [ "dependencies", "graph", "modules", "require" ],
+  "version": "0.2.0",
+  "description": "module graph builder.",
+  "keywords": [ "dependencies", "graph", "modules", "require", "linker" ],
   "author": "Irakli Gozalishvili <rfobic@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Gozala/graphquire.git",
+    "url": "https://github.com/Gozala/graphquire.git",
     "web": "https://github.com/Gozala/graphquire"
   },
   "bugs": {
     "web": "http://github.com/Gozala/graphquire/issues/"
-  },
-  "directories": {
-    "doc": "./docs",
-    "lib": "./lib",
-    "test": "./test"
   },
   "devDependencies": {
     "test": ">=0.0.10"
