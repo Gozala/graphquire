@@ -87,3 +87,8 @@ cached locally. Go ahead and try the same with
 [another package](./test/fixtures/pckg2/package.json) and you'll see that
 non-cached absolute modules still will be in graph and they will even contain
 module source.
+
+
+In addition you can create graphs for remote packages:
+
+    graphquire https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json
