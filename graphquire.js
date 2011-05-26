@@ -52,25 +52,23 @@ function resolveURI(uri, base) {
 function resolvePluginURI(id) {
   return extractPluginName(id) + '://' + normalizeURI(extractURI(id))
 }
-function downloadFile(path, uri, callback) {
-  uri = url.parse(uri)
-  uri.path = uri.pathname
-  var get = uri.protocol === 'http:' ? http.get : https.get
-  get(uri, function onResponse(response) {
-    response.on('data', function onData(buffer) {
-      // TODO: We need to make path and write buffer into it.
-      callback(null, buffer)
-      /*fs.writeFile(path, buffer, function onWrite(error) {
-        callback(error, buffer)
-      })*/
-    })
+function readURL(module, callback) {
+  var options = url.parse(module.uri)
+  options.path = options.pathname
+  options.followRedirect = true
+  options.maxRedirects = 2
+  var get = module.uri.protocol === 'http:' ? http.get : https.get
+  get(options, function onResponse(response) {
     response.on('error', callback)
+    response.on('data', function onData(buffer) {
+      callback(null, module.source = String(buffer))
+    })
   }).on('error', callback)
 }
 function getSource(program, module, callback) {
   var filename = path.join(path.dirname(program.path), module.path)
   fs.stat(filename, function onStat(error) {
-    if (error) downloadFile(filename, module.uri, callback)
+    if (error) readURL(module, callback)
     else fs.readFile(filename, callback)
   })
 }
