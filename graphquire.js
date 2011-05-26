@@ -44,7 +44,7 @@ function resolveID(id, base) {
     id = extractPluginName(id) + '!' + resolve(extractURI(id), base)
   else
     id = resolve(id, base)
-  return id
+  return normalizeURI(id)
 }
 function resolveURI(uri, base) {
   return normalizeURI(resolveID(uri, base))
