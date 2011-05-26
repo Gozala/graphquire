@@ -1,0 +1,5 @@
+{
+  "name": "pckg2",
+  "version": "0.0.1",
+  "description": "test package with remote dependencies"
+}
