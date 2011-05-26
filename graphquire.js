@@ -31,7 +31,7 @@ function isURI(uri) {
 }
 function normalizePackageLocation(uri) {
   return isPackageLocation(uri) ? uri :
-         uri + (uri[uri.length] === "/" ? "" : "/") + "package.json"
+         uri + (uri[uri.length - 1] === "/" ? "" : "/") + "package.json"
 }
 function isPluginURI(uri) { return uri && ~uri.indexOf('!') }
 function isRelativeURI(id) { return id && id.charAt(0) === '.' }
@@ -96,42 +96,58 @@ function getSource(metadata, module, callback) {
   })
 }
 
+function onDependency(metadata, requirer, next, dependencyID) {
+  var id, module;
+  id = resolveID(dependencyID, requirer.id)
+  id = requirer.requirements[dependencyID] = id
+
+  // If module is already loaded or is being fetched we just go next.
+  if (id in metadata.modules)
+    return next(metadata, metadata.module[id], next)
+
+  // Otherwise we create module and start resolving it's dependencies
+  module = metadata.modules[id] = { id: id }
+  module.path = isPluginURI(id) ?
+                normalizeURI(path.join(metadata.cachePath, id)) :
+                resolveURI(id, requirer.path)
+
+  if (isPluginURI(id))
+    module.uri = resolvePluginURI(id)
+
+  resolveRequirements(metadata, module, next)
+}
+
+function Next(total, callback) {
+  var current = 0
+  return function next(error) {
+    if (error) return callback(error)
+    if (++ current === total)
+      callback.apply(this, arguments)
+  }
+}
+
 function resolveRequirements(metadata, requirer, callback) {
   getSource(metadata, requirer, function(error, source) {
+    var dependencies, resolved = 0
+
     if (error) return callback(error)
 
-    // Searching for dependencies.
-    var dependencies = extractDependencies(source)
-    if (dependencies.length)
-      requirer.requirements = {}
+    // Extracting module dependencies by analyzing it's source.
+    dependencies = extractDependencies(source)
 
-    // Dependency resolution tracker that will call a callback once all the
-    // dependencies are resolved.
-    function next(error) {
-      if (error) return callback(error)
-      if (!requirer.requirements ||
-          Object.keys(requirer.requirements).length === dependencies.length)
-        callback(null, metadata)
-    }
+    // If module has no dependencies we call callback and return immediately.
+    if (!dependencies.length)
+      return callback(null, metadata)
 
-    next()
+    // If we got this far we know module has dependencies, so we create it's
+    // requirements map.
+    requirer.requirements = {}
 
-    dependencies.forEach(function onDependency(dependencyID) {
-      var id, uri, module;
-      module = {}
-      id = module.id = resolveID(dependencyID, requirer.id)
-      module.path = isPluginURI(id) ?
-                    normalizeURI(path.join(metadata.cachePath, id)) :
-                    resolveURI(id, requirer.path)
-
-      if (isPluginURI(id))
-        module.uri = resolvePluginURI(id)
-
-      requirer.requirements[dependencyID] = id
-      metadata.modules[id] = module
-
-      resolveRequirements(metadata, module, next)
-    })
+    // Creating dependency tracker which we will call after each dependency is
+    // resolved. Tracker will call `callback` once all the dependencies of this
+    // module will be resolved.
+    var next = Next(dependencies.length, callback)
+    dependencies.forEach(onDependency.bind(null, metadata, requirer, next))
   })
 }
 exports.resolveRequirements = resolveRequirements
