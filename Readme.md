@@ -48,7 +48,7 @@ This will write output like following:
     {
       "name": "pckg1",
       "cachePath": "./node_modules",
-      "path": "test/fixtures/pckg1/package.json",
+      "location": "/Users/gozala/Projects/graphquire/test/fixtures/pckg1/package.json",
       "modules": {
         "pckg1": {
           "id": "pckg1",
@@ -76,11 +76,11 @@ This will write output like following:
         "http!bar.org/c.js": {
           "id": "http!bar.org/c.js",
           "path": "node_modules/http!bar.org/c.js",
-          "uri": "http://bar.org/c.js",
-          "requirements": {}
+          "uri": "http://bar.org/c.js"
         }
       }
     }
+
 
 Please note that in this case all the modules with absolute ids were already
 cached locally. Go ahead and try the same with
