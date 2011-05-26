@@ -25,6 +25,13 @@ function extractDependencies(source) {
   return dependencies
 }
 
+function isPackageLocation(uri) { return path.basename(uri) === "package.json" }
+function isURI(uri) {
+  return 0 === uri.indexOf('http:') || 0 === uri.indexOf('https:')
+}
+function normalizePackageLocation(uri) {
+  return isPackageLocation(uri) ? uri : path.join(uri, "package.json")
+}
 function isPluginURI(uri) { return ~uri.indexOf('!') }
 function isRelativeURI(id) { return id.charAt(0) === '.' }
 function normalizeURI(uri) { return path.extname(uri) ? uri : uri + '.js' }
@@ -65,27 +72,36 @@ function readURL(module, callback) {
     })
   }).on('error', callback)
 }
-function getSource(program, module, callback) {
-  var filename = path.join(path.dirname(program.path), module.path)
-  fs.stat(filename, function onStat(error) {
+function getSource(metadata, module, callback) {
+  if (!isPluginURI(module.id) && !isRelativeURI(module.path)) {
+    module.isNative = true
+    delete module.path
+    delete module.uri
+    return callback(null, module)
+  }
+  var location = path.join(path.dirname(metadata.location), module.path)
+  fs.stat(location, function onStat(error) {
     if (error) readURL(module, callback)
-    else fs.readFile(filename, callback)
+    else fs.readFile(location, callback)
   })
 }
 
-function resolveRequirements(program, requirer, callback) {
-  getSource(program, requirer, function(error, source) {
+function resolveRequirements(metadata, requirer, callback) {
+  getSource(metadata, requirer, function(error, source) {
     if (error) return callback(error)
 
     // Searching for dependencies.
     var dependencies = extractDependencies(source)
+    if (dependencies.length)
+      requirer.requirements = {}
 
     // Dependency resolution tracker that will call a callback once all the
     // dependencies are resolved.
     function next(error) {
       if (error) return callback(error)
-      if (Object.keys(requirer.requirements).length === dependencies.length)
-        callback(null, program)
+      if (!requirer.requirements ||
+          Object.keys(requirer.requirements).length === dependencies.length)
+        callback(null, metadata)
     }
 
     next()
@@ -95,18 +111,16 @@ function resolveRequirements(program, requirer, callback) {
       module = {}
       id = module.id = resolveID(dependencyID, requirer.id)
       module.path = isPluginURI(id) ?
-                    normalizeURI(path.join(program.cachePath, id)) :
+                    normalizeURI(path.join(metadata.cachePath, id)) :
                     resolveURI(id, requirer.path)
 
       if (isPluginURI(id))
         module.uri = resolvePluginURI(id)
 
-      module.requirements = {}
-
       requirer.requirements[dependencyID] = id
-      program.modules[id] = module
+      metadata.modules[id] = module
 
-      resolveRequirements(program, module, next)
+      resolveRequirements(metadata, module, next)
     })
   })
 }
@@ -125,16 +139,16 @@ function getMetadata(path, callback) {
 exports.getMetadata = getMetadata
 
 function getGraph(options, callback) {
-  getMetadata(options.path, function onMetadata(error, metadata) {
+  var location = normalizePackageLocation(options.location)
+  getMetadata(location, function onMetadata(error, metadata) {
     if (error) return callback(error)
 
-    metadata.cachePath = options.cachePath
-    metadata.path = options.path
+    metadata.cachePath = options.cachePath || '.'
+    metadata.location = location
     metadata.modules = {}
     resolveRequirements(metadata, (metadata.modules[metadata.name] = {
       id: metadata.name,
-      path: normalizeURI(metadata.main || "./index.js", metadata.path),
-      requirements: {}
+      path: normalizeURI(metadata.main || "./index.js", metadata.location),
     }), callback)
   })
 }

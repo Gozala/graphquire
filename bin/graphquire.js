@@ -9,7 +9,10 @@
 
 var graphquire = require('../graphquire')
 
-var options = { path: process.argv[2], cachePath: './node_modules' }
+var options = {
+  location: process.argv[2] || process.cwd(),
+  cachePath: './node_modules'
+}
 graphquire.getGraph(options, function(error, graph) {
   if (error) console.trace(error)
   else console.log(JSON.stringify(graph, '', '  '))
