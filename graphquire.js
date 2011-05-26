@@ -30,10 +30,11 @@ function isURI(uri) {
   return 0 === uri.indexOf('http:') || 0 === uri.indexOf('https:')
 }
 function normalizePackageLocation(uri) {
-  return isPackageLocation(uri) ? uri : path.join(uri, "package.json")
+  return isPackageLocation(uri) ? uri :
+         uri + (uri[uri.length] === "/" ? "" : "/") + "package.json"
 }
-function isPluginURI(uri) { return ~uri.indexOf('!') }
-function isRelativeURI(id) { return id.charAt(0) === '.' }
+function isPluginURI(uri) { return uri && ~uri.indexOf('!') }
+function isRelativeURI(id) { return id && id.charAt(0) === '.' }
 function normalizeURI(uri) { return path.extname(uri) ? uri : uri + '.js' }
 function extractURI(uri) {
   var index = uri.indexOf('!')
@@ -59,21 +60,30 @@ function resolveURI(uri, base) {
 function resolvePluginURI(id) {
   return extractPluginName(id) + '://' + normalizeURI(extractURI(id))
 }
-function readURL(module, callback) {
-  var options = url.parse(module.uri)
+
+function readURL(uri, callback) {
+  var options = url.parse(uri)
   options.path = options.pathname
   options.followRedirect = true
   options.maxRedirects = 2
-  var get = module.uri.protocol === 'http:' ? http.get : https.get
+  var get = options.protocol === 'http:' ? http.get : https.get
   get(options, function onResponse(response) {
     response.on('error', callback)
     response.on('data', function onData(buffer) {
-      callback(null, module.source = String(buffer))
+      callback(null, buffer)
     })
   }).on('error', callback)
 }
+
+function fetchSource(module, callback) {
+  readURL(module.uri, function onRead(error, data) {
+    if (error) callback(error)
+    else callback(error, module.source = String(data))
+  })
+}
+
 function getSource(metadata, module, callback) {
-  if (!isPluginURI(module.id) && !isRelativeURI(module.path)) {
+  if (module.path && !isPluginURI(module.id) && !isRelativeURI(module.path)) {
     module.isNative = true
     delete module.path
     delete module.uri
@@ -81,7 +91,7 @@ function getSource(metadata, module, callback) {
   }
   var location = path.join(path.dirname(metadata.location), module.path)
   fs.stat(location, function onStat(error) {
-    if (error) readURL(module, callback)
+    if (error) fetchSource(module, callback)
     else fs.readFile(location, callback)
   })
 }
@@ -126,11 +136,12 @@ function resolveRequirements(metadata, requirer, callback) {
 }
 exports.resolveRequirements = resolveRequirements
 
-function getMetadata(path, callback) {
-  fs.readFile(path, function onRead(error, data) {
+function getMetadata(location, callback) {
+  var read = isURI(location) ? readURL : fs.readFile
+  read(location, function onRead(error, data) {
     if (error) return callback(error)
     try {
-      callback(null, JSON.parse(data))
+      callback(null, JSON.parse(String(data)))
     } catch (exception) {
       callback(exception)
     }
@@ -146,10 +157,16 @@ function getGraph(options, callback) {
     metadata.cachePath = options.cachePath || '.'
     metadata.location = location
     metadata.modules = {}
-    resolveRequirements(metadata, (metadata.modules[metadata.name] = {
-      id: metadata.name,
-      path: normalizeURI(metadata.main || "./index.js", metadata.location),
-    }), callback)
+
+    var main = metadata.modules[metadata.name] = { }
+    if (isURI(location)) {
+      main.uri = url.resolve(location, metadata.main || "./index.js")
+      main.id = main.uri.replace("://", "!")
+    } else {
+      main.id = metadata.name
+      main.path = normalizeURI(metadata.main || "./index.js")
+    }
+    resolveRequirements(metadata, main, callback)
   })
 }
 exports.getGraph = getGraph
