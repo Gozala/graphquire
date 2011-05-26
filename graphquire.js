@@ -95,7 +95,7 @@ function resolveRequirements(program, requirer, callback) {
       module = {}
       id = module.id = resolveID(dependencyID, requirer.id)
       module.path = isPluginURI(id) ?
-                    normalizeURI(path.join(program.cacheURI, id)) :
+                    normalizeURI(path.join(program.cachePath, id)) :
                     resolveURI(id, requirer.path)
 
       if (isPluginURI(id))
@@ -124,16 +124,16 @@ function getMetadata(path, callback) {
 }
 exports.getMetadata = getMetadata
 
-function getGraph(filename, callback) {
-  getMetadata(filename, function onMetadata(error, metadata) {
+function getGraph(options, callback) {
+  getMetadata(options.path, function onMetadata(error, metadata) {
     if (error) return callback(error)
 
-    metadata.cacheURI = './node_modules'
-    metadata.path = filename
+    metadata.cachePath = options.cachePath
+    metadata.path = options.path
     metadata.modules = {}
     resolveRequirements(metadata, (metadata.modules[metadata.name] = {
       id: metadata.name,
-      path: normalizeURI(metadata.main || "./index.js", filename),
+      path: normalizeURI(metadata.main || "./index.js", metadata.path),
       requirements: {}
     }), callback)
   })
