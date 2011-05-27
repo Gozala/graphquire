@@ -92,3 +92,50 @@ module source.
 In addition you can create graphs for remote packages:
 
     graphquire https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json
+
+And you'll get something like following but with an actual source code of the
+module under the `source` attributes:
+
+
+    {
+      "name": "pckg2",
+      "version": "0.0.1",
+      "description": "test package with remote dependencies",
+      "cachePath": "./node_modules",
+      "location": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json",
+      "modules": {
+        "pckg2": {
+          "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
+          "id": "https!github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
+          "source": "...."
+          "requirements": {
+            "https!github.com/Gozala/models/raw/master/lib/models.js": "https!github.com/Gozala/models/raw/master/lib/models.js"
+          }
+        },
+        "https!github.com/Gozala/models/raw/master/lib/models.js": {
+          "id": "https!github.com/Gozala/models/raw/master/lib/models.js",
+          "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/models.js",
+          "uri": "https://github.com/Gozala/models/raw/master/lib/models.js",
+          "source": "....."
+          "requirements": {
+            "./events": "https!github.com/Gozala/models/raw/master/lib/events.js"
+          }
+        },
+        "https!github.com/Gozala/models/raw/master/lib/events.js": {
+          "id": "https!github.com/Gozala/models/raw/master/lib/events.js",
+          "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/events.js",
+          "uri": "https://github.com/Gozala/models/raw/master/lib/events.js",
+          "source": "....."
+          "requirements": {
+            "./extendables": "https!github.com/Gozala/models/raw/master/lib/extendables.js"
+          }
+        },
+        "https!github.com/Gozala/models/raw/master/lib/extendables.js": {
+          "id": "https!github.com/Gozala/models/raw/master/lib/extendables.js",
+          "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/extendables.js",
+          "uri": "https://github.com/Gozala/models/raw/master/lib/extendables.js",
+          "source": "...."
+        }
+      }
+    }
+
