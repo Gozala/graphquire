@@ -139,3 +139,7 @@ module under the `source` attributes:
       }
     }
 
+You can also write dependencies so that node can use them:
+
+    graphquire -w .
+
