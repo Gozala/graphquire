@@ -14,6 +14,13 @@ var url = require('url')
 var COMMENT_PATTERN = /(\/\*[\s\S]*?\*\/)|((^|\n)[^('|"|\n)]*\/\/[^\n]*)/g
 var REQUIRE_PATTERN = /require\s*\(['"]([\w\W]*?)['"]\s*\)/g
 
+var GET_METADATA = exports.GET_METADATA = 0
+var GOT_METADATA = exports.GOT_MODULE = 1
+var GET_MODULE = exports.GET_MODULE = 2
+var READ_FILE = exports.READ_FILE = 3
+var FETCH_URL = exports.FETCH_URL = 4
+var GOT_MODULE = exports.GOT_MODULE = 5
+
 function extractDependencies(source) {
   var dependency, dependencies = []
   // Removing comments to avoid capturing commented require statements.
@@ -78,32 +85,34 @@ function readURL(uri, callback) {
 function fetchSource(module, callback) {
   readURL(module.uri, function onRead(error, data) {
     if (error) callback(error)
-    else callback(error, module.source = String(data))
+    else callback(error, module.source = data)
   })
 }
 
-function getSource(metadata, module, callback) {
+function getSource(metadata, module, onComplete, onProgress) {
   if (module.path && !isPluginURI(module.id) && !isRelativeURI(module.path)) {
     module.isNative = true
     delete module.path
     delete module.uri
-    return callback(null, module)
+    return onComplete(null, module)
   }
   var location = path.join(path.dirname(metadata.location), module.path)
-  fs.stat(location, function onStat(error) {
-    if (error) fetchSource(module, callback)
-    else fs.readFile(location, callback)
+  if (onProgress) onProgress(READ_FILE, location)
+  fs.readFile(location, function onRead(error, buffer) {
+    if (!error || error.code !== 'ENOENT') return onComplete(error, buffer)
+    if (onProgress) onProgress(FETCH_URL, module.uri)
+    fetchSource(module, onComplete)
   })
 }
 
-function onDependency(metadata, requirer, next, dependencyID) {
+function getDependency(metadata, requirer, next, onProgress, dependencyID) {
   var id, module;
   id = resolveID(dependencyID, requirer.id)
   id = requirer.requirements[dependencyID] = id
 
   // If module is already loaded or is being fetched we just go next.
-  if (id in metadata.modules)
-    return next(metadata, metadata.module[id], next)
+  if ((module = metadata.modules[id]))
+    return next(metadata, module, next)
 
   // Otherwise we create module and start resolving it's dependencies
   module = metadata.modules[id] = { id: id }
@@ -114,41 +123,44 @@ function onDependency(metadata, requirer, next, dependencyID) {
   if (isPluginURI(id))
     module.uri = resolvePluginURI(id)
 
-  resolveRequirements(metadata, module, next)
+  resolveRequirements(metadata, module, next, onProgress)
 }
 
-function Next(total, callback) {
+function Next(total, onComplete, onProgress) {
   var current = 0
-  return function next(error) {
-    if (error) return callback(error)
+  return function next(error, metadata, module) {
+    if (error) return onComplete(error)
     if (++ current === total)
-      callback.apply(this, arguments)
+      onComplete(error, metadata, module)
   }
 }
 
-function resolveRequirements(metadata, requirer, callback) {
-  getSource(metadata, requirer, function(error, source) {
+function resolveRequirements(metadata, module, onComplete, onProgress) {
+  if (onProgress) onProgress(GET_MODULE, module)
+  getSource(metadata, module, function onSource(error, source) {
     var dependencies, resolved = 0
 
-    if (error) return callback(error)
+    if (error) return onComplete(error)
 
     // Extracting module dependencies by analyzing it's source.
     dependencies = extractDependencies(source)
 
     // If module has no dependencies we call callback and return immediately.
     if (!dependencies.length)
-      return callback(null, metadata)
+      return onComplete(error, metadata, module)
 
     // If we got this far we know module has dependencies, so we create it's
     // requirements map.
-    requirer.requirements = {}
+    module.requirements = {}
 
     // Creating dependency tracker which we will call after each dependency is
     // resolved. Tracker will call `callback` once all the dependencies of this
     // module will be resolved.
-    var next = Next(dependencies.length, callback)
-    dependencies.forEach(onDependency.bind(null, metadata, requirer, next))
-  })
+    var next = Next(dependencies.length, onComplete)
+    dependencies.forEach(getDependency.bind(null, metadata, module, next, onProgress))
+
+    if (onProgress) onProgress(GOT_MODULE, module)
+  }, onProgress)
 }
 exports.resolveRequirements = resolveRequirements
 
@@ -165,10 +177,12 @@ function getMetadata(location, callback) {
 }
 exports.getMetadata = getMetadata
 
-function getGraph(options, callback) {
+function getGraph(options, onComplete, onProgress) {
   var location = normalizePackageLocation(options.location)
+  if (onProgress) onProgress(GET_METADATA, location)
   getMetadata(location, function onMetadata(error, metadata) {
-    if (error) return callback(error)
+    if (error) return onComplete(error)
+    if (onProgress) onProgress(GOT_METADATA, metadata)
 
     metadata.cachePath = options.cachePath || '.'
     metadata.location = location
@@ -182,7 +196,8 @@ function getGraph(options, callback) {
       main.id = metadata.name
       main.path = normalizeURI(metadata.main || "./index.js")
     }
-    resolveRequirements(metadata, main, callback)
+
+    resolveRequirements(metadata, main, onComplete, onProgress)
   })
 }
 exports.getGraph = getGraph

@@ -17,15 +17,41 @@ if (!location) {
   location = command || process.cwd()
   command = null
 }
+var options = { location: location, cachePath: './node_modules' }
+
+if (command === '-v' || command === '-d') {
+  options.onProgress = function onProgress(state, data) {
+    switch (state) {
+      case graphquire.GET_METADATA:
+        return console.log("Reading package descriptor from: " + data)
+      case graphquire.GOT_METADATA:
+        console.log("Package desriptor was parsed:")
+        return console.log(data)
+      case graphquire.GET_MODULE:
+        return console.log("Searching a module: " + data.id)
+      case graphquire.READ_FILE:
+        return console.log("Reading module forme file: " + data)
+      case graphquire.FETCH_URL:
+        return console.log("Reading module from URL: " + data)
+      case graphquire.GOT_MODULE:
+        return console.log("Module found:", data.id, data.requirements)
+    }
+  }
+}
 
 exports.read = exports['-r'] = exports['--read'] = function read(options) {
   graphquire.getGraph(options, function(error, graph) {
-    if (error) console.trace(error)
-    else console.log(JSON.stringify(graph, '', '  '))
-  })
+    if (error) return console.trace(error)
+    for (var id in graph.modules) {
+      if (graph.modules[id].source)
+        graph.modules[id].source = String(graph.modules[id].source)
+    }
+    console.log(JSON.stringify(graph, '', '  '))
+  }, options.onProgress)
 }
 
 exports.write = exports['-w'] = exports['--write'] = function write(options) {
+  var onProgress = options.onProgress
   graphquire.getGraph(options, function(error, graph) {
     if (error) return console.trace(error)
 
@@ -42,10 +68,10 @@ exports.write = exports['-w'] = exports['--write'] = function write(options) {
         utils.writeFile(module.path, module.source, next)
       }
     }
-  })
+  }, onProgress)
 }
 
 
 command = exports[command] || exports.read
-command({ location: location, cachePath: './node_modules' })
+command(options)
 
