@@ -1,5 +1,12 @@
 # History #
 
+## 0.5.0 / 2011-05-29 ##
+
+  - Improved option parsing
+  - Adding option to clean legacy dependencies.
+  - Now graphquire can be used as install script of npm to install http!
+    modules.
+
 ## 0.4.0 / 2011-05-28 ##
 
   - Ability to write dependency graph to the filesystem.
