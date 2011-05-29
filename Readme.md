@@ -21,17 +21,6 @@ sharing. Of course we can employ some tools to handle this complexity, but
 maybe absolute URIs are not bad ?! Also public module registry would make this
 a non problem: `require('http!jsm.org/underscore')`.
 
-## Goals ##
-
-At the moment `graphquire` is capable of building a module dependency graph by
-reading modules required by relative or absolute id. Also this can be converted
-to npm's post-install script, in order to fetch and write all dependencies into
-`node_modules` folder so that, such packages will work fine in nodejs. There
-is experimental browser based module loader
-[teleport](https://github.com/Gozala/teleport/blob/experimental/npm-1.x.x/teleport.js)
-that can load modules from both relative and absolute ids. In addition there is
-a plan to support addon-sdk formally jetpack in some manner.
-
 
 ## Install ##
 
@@ -39,11 +28,39 @@ a plan to support addon-sdk formally jetpack in some manner.
 
 ## Usage ##
 
-Run `graphquire` command on the `package.json` file of javascript package.
+### NodeJS ##
+
+You can use `graphquire` as npm's install script. This way you can start using
+absolute module id's in nodejs today. All you need to do is:
+
+1. Add `graphquire` to your dev-dependencies in `package.json`:
+
+    "devDependencies": {
+      "graphquire": ">=0.5.0"
+    }
+
+2. Add install script to your `package.json`:
+
+    "scripts": {
+      "install": "graphquire --clean --write"
+    }
+
+### Browser ###
+
+There is experimental browser based module loader
+[teleport](https://github.com/Gozala/teleport/blob/experimental/npm-1.x.x/teleport.js)
+that can load modules from both relative and absolute ids. This way packages
+that don't depend on engine specific functionality can be shared among browser
+nodejs and very soon with jetpack.
+
+### CLI ###
+
+You can use `graphquire` as a command line tool:
+
+1. To analyze dependency graph by running `graphquire` command on the
+`package.json` file of javascript package:
 
     graphquire test/fixtures/pckg1/package.json
-
-This will write output like following:
 
     {
       "name": "pckg1",
@@ -81,21 +98,10 @@ This will write output like following:
       }
     }
 
-
-Please note that in this case all the modules with absolute ids were already
-cached locally. Go ahead and try the same with
-[another package](./test/fixtures/pckg2/package.json) and you'll see that
-non-cached absolute modules still will be in graph and they will even contain
-module source.
-
-
-In addition you can create graphs for remote packages:
+2. You can also analyze graphs on the remote packages (Please note that source
+   attributes are replaced by ...):
 
     graphquire https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json
-
-And you'll get something like following but with an actual source code of the
-module under the `source` attributes:
-
 
     {
       "name": "pckg2",
@@ -139,7 +145,10 @@ module under the `source` attributes:
       }
     }
 
-You can also write dependencies so that node can use them:
+3. Install missing dependencies to the local filesystem:
 
-    graphquire -w .
+    graphquire --write path/to/package.json
 
+4. No longer used dependencies can be also cleaned up by additional argument:
+
+    graphquire --write --clean path/to/package.json
