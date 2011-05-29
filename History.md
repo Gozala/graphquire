@@ -1,5 +1,9 @@
 # History #
 
+## 0.5.1 / 2011-05-29 ##
+
+  - Adding property indicating preference of global installation.
+
 ## 0.5.0 / 2011-05-29 ##
 
   - Improved option parsing
