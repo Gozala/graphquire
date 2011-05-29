@@ -26,7 +26,7 @@ function isWriting() {
 }
 function isCleaning() {
   return params.some(function onEach(param) {
-    return param === '-c' || param === '--clean'
+    return param === '-c' || param === '--clean' || param === '--clear'
   })
 }
 function isVerbose() {
