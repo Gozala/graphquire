@@ -9,6 +9,7 @@
 
 var graphquire = require('../graphquire')
 var utils = require('../utils/fs')
+var path = require('path')
 
 var command = process.argv[2]
 var location = process.argv[3]
@@ -71,6 +72,32 @@ exports.write = exports['-w'] = exports['--write'] = function write(options) {
   }, onProgress)
 }
 
+function hasPath(modules, id) { return !!modules[id].path }
+function getPath(modules, id) { return modules[id].path }
+
+exports.clean = exports['-c'] = exports['--clean'] = function clean(options) {
+  var onProgress = options.onProgress
+  graphquire.getGraph(options, function(error, graph) {
+    if (error) return console.trace(error)
+    var modules = graph.modules
+    var root = path.dirname(graph.location)
+    var http = path.join(root, graph.cachePath, 'http!')
+    var https = path.join(root, graph.cachePath, 'https!')
+    var paths = Object.keys(modules).filter(hasPath.bind(null, modules))
+                                    .map(getPath.bind(null, modules))
+                                    .map(path.join.bind(path, root))
+
+    utils.reduceTree(path.join(root, graph.cachePath), function onComplete() {
+      console.log(Object.keys(modules))
+    }, function isReduced(entry) {
+      var isNative = !(~entry.indexOf(http) || ~entry.indexOf(https))
+      var isRequired = !paths.every(function(path) {
+        return !~path.indexOf(entry)
+      })
+      return !isNative && !isRequired
+    })
+  })
+}
 
 command = exports[command] || exports.read
 command(options)
