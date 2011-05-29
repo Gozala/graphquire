@@ -11,16 +11,39 @@ var graphquire = require('../graphquire')
 var utils = require('../utils/fs')
 var path = require('path')
 
-var command = process.argv[2]
-var location = process.argv[3]
+var params = process.argv.slice(2)
 
-if (!location) {
-  location = command || process.cwd()
-  command = null
+function getLocation() {
+  return params.filter(function onEach(param) {
+    return param.charAt(0) !== '-'
+  })[0] || process.cwd()
 }
-var options = { location: location, cachePath: './node_modules' }
 
-if (command === '-v' || command === '-d') {
+function isWriting() {
+  return params.some(function onEach(param) {
+    return param === '-w' || param === '--write'
+  })
+}
+function isCleaning() {
+  return params.some(function onEach(param) {
+    return param === '-c' || param === '--clean'
+  })
+}
+function isVerbose() {
+  return params.some(function onEach(param) {
+    return param === '-v' || param === '--verbose'
+  })
+}
+
+var options = {
+  cachePath: './node_modules',
+  location: getLocation(),
+  isVerbose: isVerbose(),
+  isCleaning: isCleaning(),
+  isWriting: isWriting()
+}
+
+if (options.isVerbose) {
   options.onProgress = function onProgress(state, data) {
     switch (state) {
       case graphquire.GET_METADATA:
@@ -51,54 +74,55 @@ exports.read = exports['-r'] = exports['--read'] = function read(options) {
   }, options.onProgress)
 }
 
-exports.write = exports['-w'] = exports['--write'] = function write(options) {
-  var onProgress = options.onProgress
-  graphquire.getGraph(options, function(error, graph) {
-    if (error) return console.trace(error)
+function write(graph, callback) {
+  var id, module, modules = graph.modules, steps = 1
+  function next(error) {
+    if (error) callback(error)
+    if (--steps === 0) callback(null)
+  }
 
-    var id, module, modules = graph.modules, steps = 0
-    function next(error) {
-      if (error) return console.trace(error)
-      if (--steps === 0) console.log('done!')
+  for (id in modules) {
+    module = modules[id]
+    if (module.source) {
+      steps ++
+      utils.writeFile(module.path, module.source, next)
     }
+  }
 
-    for (id in modules) {
-      module = modules[id]
-      if (module.source) {
-        steps ++
-        utils.writeFile(module.path, module.source, next)
-      }
-    }
-  }, onProgress)
+  next()
 }
 
 function hasPath(modules, id) { return !!modules[id].path }
 function getPath(modules, id) { return modules[id].path }
 
-exports.clean = exports['-c'] = exports['--clean'] = function clean(options) {
-  var onProgress = options.onProgress
-  graphquire.getGraph(options, function(error, graph) {
-    if (error) return console.trace(error)
-    var modules = graph.modules
-    var root = path.dirname(graph.location)
-    var http = path.join(root, graph.cachePath, 'http!')
-    var https = path.join(root, graph.cachePath, 'https!')
-    var paths = Object.keys(modules).filter(hasPath.bind(null, modules))
-                                    .map(getPath.bind(null, modules))
-                                    .map(path.join.bind(path, root))
-
-    utils.reduceTree(path.join(root, graph.cachePath), function onComplete() {
-      console.log(Object.keys(modules))
-    }, function isReduced(entry) {
-      var isNative = !(~entry.indexOf(http) || ~entry.indexOf(https))
-      var isRequired = !paths.every(function(path) {
-        return !~path.indexOf(entry)
-      })
-      return !isNative && !isRequired
+function clean(graph, callback) {
+  var modules = graph.modules
+  var root = path.dirname(graph.location)
+  var http = path.join(root, graph.cachePath, 'http!')
+  var https = path.join(root, graph.cachePath, 'https!')
+  var paths = Object.keys(modules).filter(hasPath.bind(null, modules))
+                                  .map(getPath.bind(null, modules))
+                                  .map(path.join.bind(path, root))
+  var location = path.join(root, graph.cachePath)
+  utils.reduceTree(location, callback, function isReduced(entry) {
+    var isNative = !(~entry.indexOf(http) || ~entry.indexOf(https))
+    var isRequired = !paths.every(function(path) {
+      return !~path.indexOf(entry)
     })
+    return !isNative && !isRequired
   })
 }
 
-command = exports[command] || exports.read
-command(options)
-
+graphquire.getGraph(options, function onGraph(error, graph) {
+  if (error) return console.trace(error)
+  if (!options.isWriting) return console.log(graph)
+  if (options.isVerbose) console.log(graph)
+  write(graph, function onWrite(error) {
+    if (error) return console.trace(error)
+    if (!options.isCleaning) return console.log('Dependencies installed!')
+    clean(graph, function onClean(error) {
+      if (error) console.trace(error)
+      else console.log("Dependencies installed!")
+    })
+  })
+}, options.onProgress)
