@@ -115,8 +115,14 @@ function clean(graph, callback) {
 
 graphquire.getGraph(options, function onGraph(error, graph) {
   if (error) return console.trace(error)
-  if (!options.isWriting) return console.log(JSON.stringify(graph, '', '   '))
-  if (options.isVerbose) console.log(JSON.stringify(graph, '', '   '))
+  if (!options.isWriting) {
+    var id, source, modules = graph.modules
+    for (id in modules) {
+      if ((source = modules[id].source)) modules[id].source = String(source)
+    }
+    return console.log(JSON.stringify(graph, '', '   '))
+  }
+  if (options.isVerbose) console.log(graph)
   write(graph, function onWrite(error) {
     if (error) return console.trace(error)
     if (!options.isCleaning) return console.log('Dependencies installed!')
