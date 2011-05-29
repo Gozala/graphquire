@@ -24,7 +24,7 @@ a non problem: `require('http!jsm.org/underscore')`.
 
 ## Install ##
 
-    npm install graphquire
+      npm install graphquire
 
 ## Usage ##
 
@@ -35,15 +35,15 @@ absolute module id's in nodejs today. All you need to do is:
 
 1. Add `graphquire` to your dev-dependencies in `package.json`:
 
-    "devDependencies": {
-      "graphquire": ">=0.5.0"
-    }
+      "devDependencies": {
+        "graphquire": ">=0.5.0"
+      }
 
 2. Add install script to your `package.json`:
 
-    "scripts": {
-      "install": "graphquire --clean --write"
-    }
+      "scripts": {
+        "install": "graphquire --clean --write"
+      }
 
 ### Browser ###
 
@@ -60,95 +60,95 @@ You can use `graphquire` as a command line tool:
 1. To analyze dependency graph by running `graphquire` command on the
 `package.json` file of javascript package:
 
-    graphquire test/fixtures/pckg1/package.json
+      graphquire test/fixtures/pckg1/package.json
 
-    {
-      "name": "pckg1",
-      "cachePath": "./node_modules",
-      "location": "/Users/gozala/Projects/graphquire/test/fixtures/pckg1/package.json",
-      "modules": {
-        "pckg1": {
-          "id": "pckg1",
-          "path": "./index.js",
-          "requirements": {
-            "http!foo.org/a": "http!foo.org/a.js"
+      {
+        "name": "pckg1",
+        "cachePath": "./node_modules",
+        "location": "/Users/gozala/Projects/graphquire/test/fixtures/pckg1/package.json",
+        "modules": {
+          "pckg1": {
+            "id": "pckg1",
+            "path": "./index.js",
+            "requirements": {
+              "http!foo.org/a": "http!foo.org/a.js"
+            }
+          },
+          "http!foo.org/a.js": {
+            "id": "http!foo.org/a.js",
+            "path": "node_modules/http!foo.org/a.js",
+            "uri": "http://foo.org/a.js",
+            "requirements": {
+              "./nested/b": "http!foo.org/nested/b.js"
+            }
+          },
+          "http!foo.org/nested/b.js": {
+            "id": "http!foo.org/nested/b.js",
+            "path": "node_modules/http!foo.org/nested/b.js",
+            "uri": "http://foo.org/nested/b.js",
+            "requirements": {
+              "http!bar.org/c": "http!bar.org/c.js"
+            }
+          },
+          "http!bar.org/c.js": {
+            "id": "http!bar.org/c.js",
+            "path": "node_modules/http!bar.org/c.js",
+            "uri": "http://bar.org/c.js"
           }
-        },
-        "http!foo.org/a.js": {
-          "id": "http!foo.org/a.js",
-          "path": "node_modules/http!foo.org/a.js",
-          "uri": "http://foo.org/a.js",
-          "requirements": {
-            "./nested/b": "http!foo.org/nested/b.js"
-          }
-        },
-        "http!foo.org/nested/b.js": {
-          "id": "http!foo.org/nested/b.js",
-          "path": "node_modules/http!foo.org/nested/b.js",
-          "uri": "http://foo.org/nested/b.js",
-          "requirements": {
-            "http!bar.org/c": "http!bar.org/c.js"
-          }
-        },
-        "http!bar.org/c.js": {
-          "id": "http!bar.org/c.js",
-          "path": "node_modules/http!bar.org/c.js",
-          "uri": "http://bar.org/c.js"
         }
       }
-    }
 
 2. You can also analyze graphs on the remote packages (Please note that source
    attributes are replaced by ...):
 
-    graphquire https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json
+      graphquire https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json
 
-    {
-      "name": "pckg2",
-      "version": "0.0.1",
-      "description": "test package with remote dependencies",
-      "cachePath": "./node_modules",
-      "location": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json",
-      "modules": {
-        "pckg2": {
-          "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
-          "id": "https!github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
-          "source": "...."
-          "requirements": {
-            "https!github.com/Gozala/models/raw/master/lib/models.js": "https!github.com/Gozala/models/raw/master/lib/models.js"
+      {
+        "name": "pckg2",
+        "version": "0.0.1",
+        "description": "test package with remote dependencies",
+        "cachePath": "./node_modules",
+        "location": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json",
+        "modules": {
+          "pckg2": {
+            "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
+            "id": "https!github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
+            "source": "...."
+            "requirements": {
+              "https!github.com/Gozala/models/raw/master/lib/models.js": "https!github.com/Gozala/models/raw/master/lib/models.js"
+            }
+          },
+          "https!github.com/Gozala/models/raw/master/lib/models.js": {
+            "id": "https!github.com/Gozala/models/raw/master/lib/models.js",
+            "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/models.js",
+            "uri": "https://github.com/Gozala/models/raw/master/lib/models.js",
+            "source": "....."
+            "requirements": {
+              "./events": "https!github.com/Gozala/models/raw/master/lib/events.js"
+            }
+          },
+          "https!github.com/Gozala/models/raw/master/lib/events.js": {
+            "id": "https!github.com/Gozala/models/raw/master/lib/events.js",
+            "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/events.js",
+            "uri": "https://github.com/Gozala/models/raw/master/lib/events.js",
+            "source": "....."
+            "requirements": {
+              "./extendables": "https!github.com/Gozala/models/raw/master/lib/extendables.js"
+            }
+          },
+          "https!github.com/Gozala/models/raw/master/lib/extendables.js": {
+            "id": "https!github.com/Gozala/models/raw/master/lib/extendables.js",
+            "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/extendables.js",
+            "uri": "https://github.com/Gozala/models/raw/master/lib/extendables.js",
+            "source": "...."
           }
-        },
-        "https!github.com/Gozala/models/raw/master/lib/models.js": {
-          "id": "https!github.com/Gozala/models/raw/master/lib/models.js",
-          "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/models.js",
-          "uri": "https://github.com/Gozala/models/raw/master/lib/models.js",
-          "source": "....."
-          "requirements": {
-            "./events": "https!github.com/Gozala/models/raw/master/lib/events.js"
-          }
-        },
-        "https!github.com/Gozala/models/raw/master/lib/events.js": {
-          "id": "https!github.com/Gozala/models/raw/master/lib/events.js",
-          "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/events.js",
-          "uri": "https://github.com/Gozala/models/raw/master/lib/events.js",
-          "source": "....."
-          "requirements": {
-            "./extendables": "https!github.com/Gozala/models/raw/master/lib/extendables.js"
-          }
-        },
-        "https!github.com/Gozala/models/raw/master/lib/extendables.js": {
-          "id": "https!github.com/Gozala/models/raw/master/lib/extendables.js",
-          "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/extendables.js",
-          "uri": "https://github.com/Gozala/models/raw/master/lib/extendables.js",
-          "source": "...."
         }
       }
-    }
 
 3. Install missing dependencies to the local filesystem:
 
-    graphquire --write path/to/package.json
+      graphquire --write path/to/package.json
 
 4. No longer used dependencies can be also cleaned up by additional argument:
 
-    graphquire --write --clean path/to/package.json
+      graphquire --write --clean path/to/package.json
