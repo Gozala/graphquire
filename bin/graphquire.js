@@ -63,9 +63,14 @@ if (isVerbose()) {
   }
 }
 
+function failure(error) {
+  console.error('Error: ' + error)
+  console.trace(error)
+}
+
 var options = { cachePath: './node_modules', location: getLocation() }
 graphquire.getGraph(options, function onGraph(error, graph) {
-  if (error) return console.trace(error)
+  if (error) return failure(error)
   if (!isWriting()) {
     var id, source, modules = graph.modules
     for (id in modules) {
@@ -74,10 +79,10 @@ graphquire.getGraph(options, function onGraph(error, graph) {
     return console.log(JSON.stringify(graph, '', '   '))
   }
   deployment.write(graph, function onWrite(error) {
-    if (error) return console.trace(error)
+    if (error) return failure(error)
     if (!isCleaning()) return console.log('Modules installed successfully!')
     deployment.clean(graph, function onClean(error) {
-      if (error) return console.trace(error)
+      if (error) return failure(error)
       console.log('Modules installed & cleaned up successfully!')
     }, onProgress)
   }, onProgress)
