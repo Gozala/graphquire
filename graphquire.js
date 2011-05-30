@@ -141,7 +141,7 @@ function resolveRequirements(metadata, module, onComplete, onProgress) {
     var dependencies, resolved = 0
 
     if (error) return onComplete(error)
-
+    if (onProgress) onProgress(GOT_MODULE, module)
     // Extracting module dependencies by analyzing it's source.
     dependencies = extractDependencies(source)
 
@@ -158,8 +158,6 @@ function resolveRequirements(metadata, module, onComplete, onProgress) {
     // module will be resolved.
     var next = Next(dependencies.length, onComplete)
     dependencies.forEach(getDependency.bind(null, metadata, module, next, onProgress))
-
-    if (onProgress) onProgress(GOT_MODULE, module)
   }, onProgress)
 }
 exports.resolveRequirements = resolveRequirements
