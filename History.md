@@ -1,5 +1,10 @@
 # History #
 
+## 0.5.3 / 2011-05-30 ##
+
+  - Improved output printed in verbose mode.
+  - Code refactoring.
+
 ## 0.5.2 / 2011-05-29 ##
 
   - Improving print output
