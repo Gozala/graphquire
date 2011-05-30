@@ -112,7 +112,7 @@ function getDependency(metadata, requirer, next, onProgress, dependencyID) {
 
   // If module is already loaded or is being fetched we just go next.
   if ((module = metadata.modules[id]))
-    return next(metadata, module, next)
+    return next(null, metadata, module, next)
 
   // Otherwise we create module and start resolving it's dependencies
   module = metadata.modules[id] = { id: id }
