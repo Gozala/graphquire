@@ -2,6 +2,10 @@
 
 ## 0.5.3 / 2011-05-30 ##
 
+  - Bug fixes.
+
+## 0.5.3 / 2011-05-30 ##
+
   - Improved output printed in verbose mode.
   - Code refactoring.
 
