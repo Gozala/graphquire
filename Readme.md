@@ -63,11 +63,12 @@ You can use `graphquire` as a command line tool:
         graphquire test/fixtures/pckg1/package.json
 
         {
-           "name": "pckg1",
            "cachePath": "./node_modules",
            "location": "/Users/gozala/Projects/graphquire/test/fixtures/pckg1/package.json",
-           "manifest": {
-              "./package.json": {},
+           "metadata": {
+              "name": "pckg1"
+           },
+           "modules": {
               "./index.js": {
                  "id": "./index.js",
                  "path": "./index.js",
@@ -106,16 +107,14 @@ You can use `graphquire` as a command line tool:
         graphquire https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json
 
         {
-           "name": "pckg2",
-           "version": "0.0.1",
-           "description": "test package with remote dependencies",
            "cachePath": "./node_modules",
            "location": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json",
-           "manifest": {
-              "./package.json": {
-                 "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json",
-                 "source": "...."
-              },
+           "metadata" {
+              "name": "pckg2",
+              "version": "0.0.1",
+              "description": "test package with remote dependencies"
+           },
+           "modules": {
               "./index.js": {
                  "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
                  "id": "./index.js",

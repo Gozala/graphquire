@@ -18,7 +18,7 @@ var WROTE_MODULE = exports.WROTE_MODULE = 10
 function hasPath(modules, id) { return !!modules[id].path }
 function getPath(modules, id) { return modules[id].path }
 function clean(graph, onComplete, onProgress) {
-  var modules = graph.manifest
+  var modules = graph.modules
   var root = path.dirname(graph.location)
   var http = path.join(root, graph.cachePath, 'http!')
   var https = path.join(root, graph.cachePath, 'https!')
@@ -40,7 +40,7 @@ function clean(graph, onComplete, onProgress) {
 exports.clean = clean
 
 function write(graph, onComplete, onProgress) {
-  var id, module, modules = graph.manifest, steps = 1
+  var id, module, modules = graph.modules, steps = 1
   function next(module, error) {
     if (error) onComplete(error)
     if (onProgress && module) onProgress(WROTE_MODULE, module)

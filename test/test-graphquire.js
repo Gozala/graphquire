@@ -19,12 +19,12 @@ exports['test basic'] = function(assert, done) {
   var options = optionsFor('pckg1')
   getGraph(options, function onGraph(error, graph) {
     assert.deepEqual(graph, {
-      "name": "pckg1",
       "cachePath": "./node_modules",
       "location": options.location + '/package.json',
-      "manifest": {
-        "./package.json": {
-        },
+      "metadata": {
+        "name": "pckg1"
+      },
+      "modules": {
         "./index.js": {
           "id": "./index.js",
           "path": "./index.js",

@@ -127,11 +127,11 @@ function getDependency(metadata, requirer, next, onProgress, dependencyID) {
   id = requirer.requirements[dependencyID] = id
 
   // If module is already loaded or is being fetched we just go next.
-  if ((module = metadata.manifest[id]))
+  if ((module = metadata.modules[id]))
     return next(null, metadata, module, next)
 
   // Otherwise we create module and start resolving it's dependencies
-  module = metadata.manifest[id] = { id: id }
+  module = metadata.modules[id] = { id: id }
   module.path = isPluginURI(id) ?
                 path.join(metadata.cachePath, id) : id
 
@@ -186,32 +186,25 @@ function getMetadata(location, callback) {
 exports.getMetadata = getMetadata
 
 function getGraph(options, onComplete, onProgress) {
-  var location = normalizePackageLocation(options.location)
-  if (onProgress) onProgress(GET_METADATA, location)
-  getMetadata(location, function onMetadata(error, content) {
-    var metadata
+  var graph = {
+    location: normalizePackageLocation(options.location),
+    cachePath: options.cachePath || './'
+  }
+  if (onProgress) onProgress(GET_METADATA, graph.location)
+  getMetadata(graph.location, function onMetadata(error, content) {
     if (error) return onComplete(error)
 
-    metadata = JSON.parse(String(content))
-    metadata.cachePath = options.cachePath || '.'
-    metadata.location = location
-    metadata.manifest = {}
+    graph.metadata = JSON.parse(String(content))
+    graph.modules = {}
 
-    var pckg = metadata.manifest['./package.json'] = {}
-    if (isURI(location)) pckg.uri = location, pckg.source = content
+    if (onProgress) onProgress(GOT_METADATA, graph.metadata)
 
-    if (onProgress) onProgress(GOT_METADATA, metadata)
+    var main = { id: graph.metadata.main || "./index.js" }
+    graph.modules[main.id] = main
+    if (isURI(graph.location)) main.uri = url.resolve(graph.location, main.id)
+    else main.path = normalizeURI(main.id)
 
-    var main = metadata.manifest[metadata.main || "./index.js"] = { }
-    if (isURI(location)) {
-      main.uri = url.resolve(location, metadata.main || "./index.js")
-      main.id = metadata.main || "./index.js"
-    } else {
-      main.id = metadata.main || "./index.js"
-      main.path = normalizeURI(metadata.main || "./index.js")
-    }
-
-    resolveRequirements(metadata, main, onComplete, onProgress)
+    resolveRequirements(graph, main, onComplete, onProgress)
   })
 }
 exports.getGraph = getGraph

@@ -72,7 +72,7 @@ var options = { cachePath: './node_modules', location: getLocation() }
 graphquire.getGraph(options, function onGraph(error, graph) {
   if (error) return failure(error)
   if (!isWriting()) {
-    var id, source, modules = graph.manifest
+    var id, source, modules = graph.modules
     for (id in modules) {
       if ((source = modules[id].source)) modules[id].source = String(source)
     }
