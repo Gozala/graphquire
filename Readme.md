@@ -68,7 +68,7 @@ You can use `graphquire` as a command line tool:
           "location": "/Users/gozala/Projects/graphquire/test/fixtures/pckg1/package.json",
           "modules": {
             "pckg1": {
-              "id": "pckg1",
+              "./index.js": "./index.js",
               "path": "./index.js",
               "requirements": {
                 "http!foo.org/a": "http!foo.org/a.js"
@@ -110,13 +110,13 @@ You can use `graphquire` as a command line tool:
           "cachePath": "./node_modules",
           "location": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json",
           "modules": {
-            "pckg2": {
-              "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
-              "id": "https!github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
-              "source": "...."
-              "requirements": {
-                "https!github.com/Gozala/models/raw/master/lib/models.js": "https!github.com/Gozala/models/raw/master/lib/models.js"
-              }
+          "./index.js": {
+               "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
+               "id": "./index.js",
+               "source": ".....",
+               "requirements": {
+                  "https!github.com/Gozala/models/raw/master/lib/models.js": "https!github.com/Gozala/models/raw/master/lib/models.js"
+               }
             },
             "https!github.com/Gozala/models/raw/master/lib/models.js": {
               "id": "https!github.com/Gozala/models/raw/master/lib/models.js",
