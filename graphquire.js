@@ -106,7 +106,7 @@ function fetchSource(module, callback) {
 }
 
 function getSource(metadata, module, onComplete, onProgress) {
-  if (module.path && !isPluginURI(module.id) && !isRelativeURI(module.path)) {
+  if (!isPluginURI(module.id) && !isRelativeURI(module.id)) {
     module.isNative = true
     delete module.path
     delete module.uri
