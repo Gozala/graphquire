@@ -133,10 +133,12 @@ function getDependency(metadata, requirer, next, onProgress, dependencyID) {
   // Otherwise we create module and start resolving it's dependencies
   module = metadata.modules[id] = { id: id }
   module.path = isPluginURI(id) ?
-                normalizeURI(path.join(metadata.cachePath, id)) : id
+                path.join(metadata.cachePath, id) : id
 
   if (isPluginURI(id))
     module.uri = resolvePluginURI(id)
+  else if (requirer.uri)
+    module.uri = resolveURI(dependencyID, requirer.uri)
 
   resolveRequirements(metadata, module, next, onProgress)
 }
