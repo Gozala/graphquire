@@ -22,7 +22,9 @@ exports['test basic'] = function(assert, done) {
       "name": "pckg1",
       "cachePath": "./node_modules",
       "location": options.location + '/package.json',
-      "modules": {
+      "manifest": {
+        "./package.json": {
+        },
         "./index.js": {
           "id": "./index.js",
           "path": "./index.js",

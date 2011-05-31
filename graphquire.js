@@ -127,11 +127,11 @@ function getDependency(metadata, requirer, next, onProgress, dependencyID) {
   id = requirer.requirements[dependencyID] = id
 
   // If module is already loaded or is being fetched we just go next.
-  if ((module = metadata.modules[id]))
+  if ((module = metadata.manifest[id]))
     return next(null, metadata, module, next)
 
   // Otherwise we create module and start resolving it's dependencies
-  module = metadata.modules[id] = { id: id }
+  module = metadata.manifest[id] = { id: id }
   module.path = isPluginURI(id) ?
                 path.join(metadata.cachePath, id) : id
 
@@ -181,29 +181,28 @@ exports.resolveRequirements = resolveRequirements
 
 function getMetadata(location, callback) {
   var read = isURI(location) ? readURL : fs.readFile
-  read(location, function onRead(error, data) {
-    if (error) return callback(error)
-    try {
-      callback(null, JSON.parse(String(data)))
-    } catch (exception) {
-      callback(exception)
-    }
-  })
+  read(location, callback)
 }
 exports.getMetadata = getMetadata
 
 function getGraph(options, onComplete, onProgress) {
   var location = normalizePackageLocation(options.location)
   if (onProgress) onProgress(GET_METADATA, location)
-  getMetadata(location, function onMetadata(error, metadata) {
+  getMetadata(location, function onMetadata(error, content) {
+    var metadata
     if (error) return onComplete(error)
-    if (onProgress) onProgress(GOT_METADATA, metadata)
 
+    metadata = JSON.parse(String(content))
     metadata.cachePath = options.cachePath || '.'
     metadata.location = location
-    metadata.modules = {}
+    metadata.manifest = {}
 
-    var main = metadata.modules[metadata.main || "./index.js"] = { }
+    var pckg = metadata.manifest['./package.json'] = {}
+    if (isURI(location)) pckg.uri = location, pckg.source = content
+
+    if (onProgress) onProgress(GOT_METADATA, metadata)
+
+    var main = metadata.manifest[metadata.main || "./index.js"] = { }
     if (isURI(location)) {
       main.uri = url.resolve(location, metadata.main || "./index.js")
       main.id = metadata.main || "./index.js"
