@@ -51,8 +51,24 @@ function extractPluginName(id) {
   var index = id.indexOf('!')
   return index > 0 ? id.substr(0, index) : ''
 }
-function resolve(id, base) {
-  return isRelativeURI(id) ? path.join(path.dirname(base), id) : id
+function isAbsolute(uri) { return uri && uri.charAt(0) !== '.' }
+function resolve(uri, base) {
+  var path, paths, last
+  if (isAbsolute(uri)) return uri
+  paths = uri.split('/')
+  base = base ? base.split('/') : [ '.' ]
+  if (base.length > 1) base.pop()
+  while ((path = paths.shift())) {
+    if (path === '..') {
+      if (base.length && base[base.length - 1] !== '..') {
+        if (base.pop() === '.') base.push(path)
+      } else base.push(path)
+    } else if (path !== '.') {
+      base.push(path)
+    }
+  }
+  if (base[base.length - 1].substr(-1) === '.') base.push('')
+  return base.join('/')
 }
 function resolveID(id, base) {
   if (isPluginURI(id))
