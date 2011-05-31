@@ -133,8 +133,7 @@ function getDependency(metadata, requirer, next, onProgress, dependencyID) {
   // Otherwise we create module and start resolving it's dependencies
   module = metadata.modules[id] = { id: id }
   module.path = isPluginURI(id) ?
-                normalizeURI(path.join(metadata.cachePath, id)) :
-                resolveURI(id, requirer.path)
+                normalizeURI(path.join(metadata.cachePath, id)) : id
 
   if (isPluginURI(id))
     module.uri = resolvePluginURI(id)
@@ -202,12 +201,12 @@ function getGraph(options, onComplete, onProgress) {
     metadata.location = location
     metadata.modules = {}
 
-    var main = metadata.modules[metadata.name] = { }
+    var main = metadata.modules[metadata.main || "./index.js"] = { }
     if (isURI(location)) {
       main.uri = url.resolve(location, metadata.main || "./index.js")
-      main.id = main.uri.replace("://", "!")
+      main.id = metadata.main || "./index.js"
     } else {
-      main.id = metadata.name
+      main.id = metadata.main || "./index.js"
       main.path = normalizeURI(metadata.main || "./index.js")
     }
 
