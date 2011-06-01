@@ -1,5 +1,14 @@
 # History #
 
+## 0.5.5 / 2011-06-01 ##
+
+  - Make all local IDs are relative to `package.json`
+  - Moved out package descriptor attributes into `metadata` attribute.
+
+## 0.5.4 / 2011-05-30 ##
+
+  - Bug fixes.
+
 ## 0.5.3 / 2011-05-30 ##
 
   - Bug fixes.

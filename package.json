@@ -1,8 +1,8 @@
 {
   "name": "graphquire",
   "id": "graphquire",
-  "version": "0.5.4",
-  "description": "module graph builder.",
+  "version": "0.5.5",
+  "description": "module graph builder and installer.",
   "keywords": [ "dependencies", "graph", "modules", "require", "linker" ],
   "author": "Irakli Gozalishvili <rfobic@gmail.com>",
   "repository": {
