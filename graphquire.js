@@ -51,10 +51,9 @@ function extractPluginName(id) {
   var index = id.indexOf('!')
   return index > 0 ? id.substr(0, index) : ''
 }
-function isAbsolute(uri) { return uri && uri.charAt(0) !== '.' }
 function resolve(uri, base) {
   var path, paths, last
-  if (isAbsolute(uri)) return uri
+  if (!isRelativeURI(uri)) return uri
   paths = uri.split('/')
   base = base ? base.split('/') : [ '.' ]
   if (base.length > 1) base.pop()
@@ -76,9 +75,6 @@ function resolveID(id, base) {
   else
     id = resolve(id, base)
   return normalizeURI(id)
-}
-function resolveURI(uri, base) {
-  return normalizeURI(resolveID(uri, base))
 }
 function resolvePluginURI(id) {
   return extractPluginName(id) + '://' + normalizeURI(extractURI(id))
