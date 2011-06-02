@@ -16,7 +16,7 @@ function optionsFor(name, cachePath) {
 }
 
 exports['test basic'] = function(assert, done) {
-  var options = optionsFor('pckg1')
+  var options = optionsFor('pckg-uncached')
   getGraph(options, function onGraph(error, graph) {
     assert.deepEqual(graph, {
       "cachePath": "./node_modules",
