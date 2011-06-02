@@ -34,6 +34,11 @@ function isVerbose() {
     return param === '-v' || param === '--verbose'
   })
 }
+function isNoSource() {
+  return params.some(function onEach(param) {
+    return param === '--no-source'
+  })
+}
 
 if (isVerbose()) {
   onProgress = function onProgress(state, data) {
@@ -68,7 +73,11 @@ function failure(error) {
   console.trace(error)
 }
 
-var options = { cachePath: './node_modules', location: getLocation() }
+var options = {
+  cachePath: './node_modules',
+  location: getLocation(),
+  includeSource: !isNoSource(),
+}
 graphquire.getGraph(options, function onGraph(error, graph) {
   if (error) return failure(error)
   if (!isWriting()) {

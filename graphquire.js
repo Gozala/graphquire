@@ -145,7 +145,7 @@ function resolveRequirements(graph, module, onComplete, onProgress) {
 
     if (error) return onComplete(error)
     if (onProgress) onProgress(GOT_MODULE, module)
-    if (isRemote) module.source = source
+    if (isRemote && graph.includesSource) module.source = source
     // Extracting module dependencies by analyzing it's source.
     dependencies = extractDependencies(source)
 
@@ -178,6 +178,7 @@ function getGraph(options, onComplete, onProgress) {
     path: isURI(location) ? './' : location,
     uri: isURI(location) ? location : './',
     cachePath: options.cachePath || './',
+    includesSource: options.includeSource || false,
     resolvePath: function resolvePath(id) {
       var root = path.dirname(graph.path)
       return isPluginURI(id) ? path.join(root, graph.cachePath, id) :
