@@ -19,7 +19,7 @@ function hasPath(modules, id) { return !!modules[id].path }
 function getPath(modules, id) { return modules[id].path }
 function clean(graph, onComplete, onProgress) {
   var modules = graph.modules
-  var root = path.dirname(graph.location)
+  var root = path.dirname(graph.path)
   var http = path.join(root, graph.cachePath, 'http!')
   var https = path.join(root, graph.cachePath, 'https!')
   var paths = Object.keys(modules).filter(hasPath.bind(null, modules))
@@ -51,7 +51,7 @@ function write(graph, onComplete, onProgress) {
     module = modules[id]
     if (module.source) {
       steps ++
-      utils.writeFile(module.path, module.source, next.bind(null, module))
+      utils.writeFile(graph.resolvePath(module.id), module.source, next.bind(null, module))
       ;delete module.source // removing source as it's no longer necessary
       if (onProgress) onProgress(WRITE_MODULE, module)
     }
