@@ -93,30 +93,23 @@ function readURL(uri, callback) {
   get(options, function onResponse(response) {
     response.on('error', callback)
     response.on('data', function onData(buffer) {
-      callback(null, buffer)
+      callback(null, buffer, true)
     })
   }).on('error', callback)
 }
 
-function fetchSource(module, callback) {
-  readURL(module.uri, function onRead(error, data) {
-    if (error) callback(error)
-    else callback(error, module.source = data)
-  })
-}
-
 function getSource(graph, module, onComplete, onProgress) {
-  if (isRelativeURI(module.id) || isPluginURI(module.id)) {
-    var location = graph.resolve(module.id)
-    if (onProgress) onProgress(READ_FILE, location)
-    fs.readFile(location, function onRead(error, buffer) {
+  var path = graph.resolvePath(module.id)
+  var uri = graph.resolveURI(module.id)
+  if (path) {
+    if (onProgress) onProgress(READ_FILE, module.path)
+    fs.readFile(path, function onRead(error, buffer) {
       if (!error || error.code !== 'ENOENT') return onComplete(error, buffer)
-      if (onProgress) onProgress(FETCH_URL, module.uri)
-      fetchSource(module, onComplete)
+      if (onProgress) onProgress(FETCH_URL, uri)
+      readURL(uri, onComplete)
     })
   } else {
     module.isNative = true
-    delete module.uri
     return onComplete(null, module)
   }
 }
@@ -133,11 +126,6 @@ function getDependency(graph, requirer, next, onProgress, dependencyID) {
   // Otherwise we create module and start resolving it's dependencies
   module = graph.modules[id] = { id: id }
 
-  if (isPluginURI(id))
-    module.uri = resolvePluginURI(id)
-  else if (requirer.uri)
-    module.uri = resolveURI(dependencyID, requirer.uri)
-
   resolveRequirements(graph, module, next, onProgress)
 }
 
@@ -152,11 +140,12 @@ function Next(total, onComplete, onProgress) {
 
 function resolveRequirements(graph, module, onComplete, onProgress) {
   if (onProgress) onProgress(GET_MODULE, module)
-  getSource(graph, module, function onSource(error, source) {
+  getSource(graph, module, function onSource(error, source, isRemote) {
     var dependencies, resolved = 0
 
     if (error) return onComplete(error)
     if (onProgress) onProgress(GOT_MODULE, module)
+    if (isRemote) module.source = source
     // Extracting module dependencies by analyzing it's source.
     dependencies = extractDependencies(source)
 
@@ -184,17 +173,23 @@ function getMetadata(location, callback) {
 exports.getMetadata = getMetadata
 
 function getGraph(options, onComplete, onProgress) {
+  var location = normalizePackageLocation(options.location)
   var graph = {
-    location: normalizePackageLocation(options.location),
+    path: isURI(location) ? './' : location,
+    uri: isURI(location) ? location : './',
     cachePath: options.cachePath || './',
-    resolve: function resolve(id, base) {
-      var root = path.dirname(graph.location)
+    resolvePath: function resolvePath(id) {
+      var root = path.dirname(graph.path)
       return isPluginURI(id) ? path.join(root, graph.cachePath, id) :
-             isRelativeURI(id) ? path.join(root, id) : id
+             isRelativeURI(id) ? path.join(root, id) : null
+    },
+    resolveURI: function resolveURI(id) {
+      return isPluginURI(id) ? resolvePluginURI(id) :
+             isRelativeURI(id) ? resolveID(id, graph.uri) : null
     }
   }
-  if (onProgress) onProgress(GET_METADATA, graph.location)
-  getMetadata(graph.location, function onMetadata(error, content) {
+  if (onProgress) onProgress(GET_METADATA, location)
+  getMetadata(location, function onMetadata(error, content) {
     if (error) return onComplete(error)
 
     graph.metadata = JSON.parse(String(content))
@@ -204,7 +199,6 @@ function getGraph(options, onComplete, onProgress) {
 
     var main = { id: graph.metadata.main || "./index.js" }
     graph.modules[main.id] = main
-    if (isURI(graph.location)) main.uri = url.resolve(graph.location, main.id)
 
     resolveRequirements(graph, main, onComplete, onProgress)
   })
