@@ -35,8 +35,8 @@ absolute module id's in nodejs today. All you need to do is:
 
 1. Add `graphquire` to your dev-dependencies in `package.json`:
 
-        "devDependencies": {
-          "graphquire": ">=0.5.0"
+        "dependencies": {
+          "graphquire": ">=0.6.0"
         }
 
 2. Add install script to your `package.json`:
@@ -70,32 +70,24 @@ You can use `graphquire` as a command line tool:
            },
            "modules": {
               "./index.js": {
-                 "id": "./index.js",
-                 "path": "./index.js",
                  "requirements": {
                     "http!foo.org/a": "http!foo.org/a.js"
                  }
               },
               "http!foo.org/a.js": {
                  "id": "http!foo.org/a.js",
-                 "path": "node_modules/http!foo.org/a.js",
-                 "uri": "http://foo.org/a.js",
                  "requirements": {
                     "./nested/b": "http!foo.org/nested/b.js"
                  }
               },
               "http!foo.org/nested/b.js": {
                  "id": "http!foo.org/nested/b.js",
-                 "path": "node_modules/http!foo.org/nested/b.js",
-                 "uri": "http://foo.org/nested/b.js",
                  "requirements": {
                     "http!bar.org/c": "http!bar.org/c.js"
                  }
               },
               "http!bar.org/c.js": {
                  "id": "http!bar.org/c.js",
-                 "path": "node_modules/http!bar.org/c.js",
-                 "uri": "http://bar.org/c.js"
               }
            }
         }
@@ -116,7 +108,6 @@ You can use `graphquire` as a command line tool:
            },
            "modules": {
               "./index.js": {
-                 "uri": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/index.js",
                  "id": "./index.js",
                  "source": ".....",
                  "requirements": {
@@ -125,8 +116,6 @@ You can use `graphquire` as a command line tool:
               },
               "https!github.com/Gozala/models/raw/master/lib/models.js": {
                  "id": "https!github.com/Gozala/models/raw/master/lib/models.js",
-                 "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/models.js",
-                 "uri": "https://github.com/Gozala/models/raw/master/lib/models.js",
                  "source": "....",
                  "requirements": {
                     "./events": "https!github.com/Gozala/models/raw/master/lib/events.js"
@@ -134,8 +123,6 @@ You can use `graphquire` as a command line tool:
               },
               "https!github.com/Gozala/models/raw/master/lib/events.js": {
                  "id": "https!github.com/Gozala/models/raw/master/lib/events.js",
-                 "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/events.js",
-                 "uri": "https://github.com/Gozala/models/raw/master/lib/events.js",
                  "source": "....",
                  "requirements": {
                     "./extendables": "https!github.com/Gozala/models/raw/master/lib/extendables.js"
@@ -143,8 +130,6 @@ You can use `graphquire` as a command line tool:
               },
               "https!github.com/Gozala/models/raw/master/lib/extendables.js": {
                  "id": "https!github.com/Gozala/models/raw/master/lib/extendables.js",
-                 "path": "node_modules/https!github.com/Gozala/models/raw/master/lib/extendables.js",
-                 "uri": "https://github.com/Gozala/models/raw/master/lib/extendables.js",
                  "source": "....."
               }
            }
