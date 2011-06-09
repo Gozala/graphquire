@@ -1,5 +1,13 @@
 # History #
 
+## 0.6.0 / 2011-06-09 ##
+
+ - Fix bug in read url (big files can be read now).
+ - Adding `--no-source` option in order to exclude source.
+ - Graph no longer contains paths / URLs for modules, instead it has resolvePath
+   / resolveURI function that take module id and return path / uri.
+ - Changed structure of graph, making it cleaner.
+
 ## 0.5.5 / 2011-06-01 ##
 
   - Make all local IDs are relative to `package.json`
