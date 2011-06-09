@@ -86,13 +86,16 @@ function readURL(uri, callback) {
   options.followRedirect = true
   options.maxRedirects = 2
   var get = options.protocol === 'http:' ? http.get : https.get
+  var buffer = ''
   get(options, function onResponse(response) {
     response.on('error', callback)
-    response.on('data', function onData(buffer) {
+    response.on('data', function onData(chunk) { buffer += chunk })
+    response.on('end', function onEnd() {
       callback(null, buffer, true)
     })
   }).on('error', callback)
 }
+exports.readURL = readURL
 
 function getSource(graph, module, onComplete, onProgress) {
   var path = graph.resolvePath(module.id)
