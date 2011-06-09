@@ -16,45 +16,32 @@ function optionsFor(name, cachePath) {
 }
 
 exports['test basic'] = function(assert, done) {
-  var options = optionsFor('pckg-uncached')
+  var options = optionsFor('pckg-cached')
   getGraph(options, function onGraph(error, graph) {
-    assert.deepEqual(graph, {
-      "cachePath": "./node_modules",
-      "location": options.location + '/package.json',
-      "metadata": {
-        "name": "pckg1"
-      },
-      "modules": {
-        "./index.js": {
-          "id": "./index.js",
-          "path": "./index.js",
-          "requirements": {
-            "http!foo.org/a": "http!foo.org/a.js"
-          }
-        },
-        "http!foo.org/a.js": {
-          "id": "http!foo.org/a.js",
-          "path": "node_modules/http!foo.org/a.js",
-          "uri": "http://foo.org/a.js",
-          "requirements": {
-            "./nested/b": "http!foo.org/nested/b.js"
-          }
-        },
-        "http!foo.org/nested/b.js": {
-          "id": "http!foo.org/nested/b.js",
-          "path": "node_modules/http!foo.org/nested/b.js",
-          "uri": "http://foo.org/nested/b.js",
-          "requirements": {
-            "http!bar.org/c": "http!bar.org/c.js"
-          }
-        },
-        "http!bar.org/c.js": {
-          "id": "http!bar.org/c.js",
-          "path": "node_modules/http!bar.org/c.js",
-          "uri": "http://bar.org/c.js",
+    assert.deepEqual(graph.metadata, { "name": "pckg1" }, "metadat is correct")
+    assert.deepEqual(graph.modules, {
+      "./index.js": {
+        "id": "./index.js",
+        "requirements": {
+          "http!foo.org/a": "http!foo.org/a.js"
         }
+      },
+      "http!foo.org/a.js": {
+        "id": "http!foo.org/a.js",
+        "requirements": {
+          "./nested/b": "http!foo.org/nested/b.js"
+        }
+      },
+      "http!foo.org/nested/b.js": {
+        "id": "http!foo.org/nested/b.js",
+        "requirements": {
+          "http!bar.org/c": "http!bar.org/c.js"
+        }
+      },
+      "http!bar.org/c.js": {
+        "id": "http!bar.org/c.js",
       }
-    }, 'correct graph is generated')
+    }, 'modules linked correctly')
     done()
   })
 }
