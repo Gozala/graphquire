@@ -15,16 +15,14 @@ var START_WRITE = exports.START_WRITE = 8
 var WRITE_MODULE = exports.WRITE_MODULE = 9
 var WROTE_MODULE = exports.WROTE_MODULE = 10
 
-function hasPath(modules, id) { return !!modules[id].path }
-function getPath(modules, id) { return modules[id].path }
 function clean(graph, onComplete, onProgress) {
   var modules = graph.modules
   var root = path.dirname(graph.path)
   var http = path.join(root, graph.cachePath, 'http!')
   var https = path.join(root, graph.cachePath, 'https!')
-  var paths = Object.keys(modules).filter(hasPath.bind(null, modules))
-                                  .map(getPath.bind(null, modules))
+  var paths = Object.keys(modules).map(graph.resolvePath.bind(graph))
                                   .map(path.join.bind(path, root))
+
   var location = path.join(root, graph.cachePath)
   utils.reduceTree(location, onComplete, function onReduce(entry) {
     var isNative = !(~entry.indexOf(http) || ~entry.indexOf(https))
