@@ -1,5 +1,9 @@
 # History #
 
+## 0.6.1 / 2011-06-12 ##
+
+  - Adding support for jetpack via `--cache-path ./` property.
+
 ## 0.6.0 / 2011-06-09 ##
 
  - Fix bug in read url (big files can be read now).

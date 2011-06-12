@@ -45,13 +45,25 @@ absolute module id's in nodejs today. All you need to do is:
           "install": "graphquire --clean --write"
         }
 
+### Jetpack ###
+
+You can use `graphquire` with jetpack, either via command line or npm's install
+script. In both cases command to execute is following:
+
+        graphquire --clean --write --cache-path ./
+
+If you'd like to use with jetpack via npm just follow nodejs instructions but
+modify install script:
+
+        "scripts": {
+          "install": "graphquire --clean --write --cache-path ./"
+        }
+
 ### Browser ###
 
-There is experimental browser based module loader
+There is experimental module loader
 [teleport](https://github.com/Gozala/teleport/blob/experimental/npm-1.x.x/teleport.js)
-that can load modules from both relative and absolute ids. This way packages
-that don't depend on engine specific functionality can be shared among browser
-nodejs and very soon with jetpack.
+allowing you to load all this modules in the browser.
 
 ### CLI ###
 
