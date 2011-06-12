@@ -19,6 +19,10 @@ function getLocation() {
   })[0] || process.cwd()
 }
 
+function cachePath() {
+  var index = params.indexOf('--cache-path')
+  return ~index ? params[++index] : './node_modules'
+}
 function isWriting() {
   return params.some(function onEach(param) {
     return param === '-w' || param === '--write'
@@ -74,10 +78,11 @@ function failure(error) {
 }
 
 var options = {
-  cachePath: './node_modules',
+  cachePath: cachePath(),
   location: getLocation(),
   includeSource: !isNoSource(),
 }
+
 graphquire.getGraph(options, function onGraph(error, graph) {
   if (error) return failure(error)
   if (!isWriting()) {
