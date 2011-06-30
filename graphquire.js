@@ -40,21 +40,12 @@ function normalizePackageLocation(uri) {
   return isPackageLocation(uri) ? uri :
          uri + (uri[uri.length - 1] === "/" ? "" : "/") + "package.json"
 }
-function isPluginURI(uri) { return uri && ~uri.indexOf('!') }
-function isRelativeURI(id) { return id && id.charAt(0) === '.' }
+function isRelative(id) { return id && id.charAt(0) === '.' }
 function normalizeURI(uri) { return path.extname(uri) ? uri : uri + '.js' }
-function extractURI(uri) {
-  var index = uri.indexOf('!')
-  return ~index ? uri.substr(++index) : uri
-}
-function extractPluginName(id) {
-  var index = id.indexOf('!')
-  return index > 0 ? id.substr(0, index) : ''
-}
-function resolve(uri, base) {
+function resolveID(id, base) {
   var path, paths, last
-  if (!isRelativeURI(uri)) return uri
-  paths = uri.split('/')
+  if (!isRelative(id)) return id
+  paths = id.split('/')
   base = base ? base.split('/') : [ '.' ]
   if (base.length > 1) base.pop()
   while ((path = paths.shift())) {
@@ -69,15 +60,8 @@ function resolve(uri, base) {
   if (base[base.length - 1].substr(-1) === '.') base.push('')
   return base.join('/')
 }
-function resolveID(id, base) {
-  if (isPluginURI(id))
-    id = extractPluginName(id) + '!' + resolve(extractURI(id), base)
-  else
-    id = resolve(id, base)
-  return normalizeURI(id)
-}
-function resolvePluginURI(id) {
-  return extractPluginName(id) + '://' + normalizeURI(extractURI(id))
+function resolve(id, base) {
+  return normalizeURI(isURI(id) ? id : resolveID(id, base))
 }
 
 function readURL(uri, callback) {
@@ -103,7 +87,8 @@ function getSource(graph, module, onComplete, onProgress) {
   if (path) {
     if (onProgress) onProgress(READ_FILE, module.path)
     fs.readFile(path, function onRead(error, buffer) {
-      if (!error || error.code !== 'ENOENT') return onComplete(error, buffer)
+      if (!error || error.code !== 'ENOENT' || !uri)
+        return onComplete(error, buffer)
       if (onProgress) onProgress(FETCH_URL, uri)
       readURL(uri, onComplete)
     })
@@ -115,7 +100,7 @@ function getSource(graph, module, onComplete, onProgress) {
 
 function getDependency(graph, requirer, next, onProgress, dependencyID) {
   var id, module;
-  id = resolveID(dependencyID, requirer.id)
+  id = resolve(dependencyID, requirer.id)
   id = requirer.requirements[dependencyID] = id
 
   // If module is already loaded or is being fetched we just go next.
@@ -180,12 +165,11 @@ function getGraph(options, onComplete, onProgress) {
     includesSource: options.includeSource || false,
     resolvePath: function resolvePath(id) {
       var root = path.dirname(graph.path)
-      return isPluginURI(id) ? path.join(root, graph.cachePath, id) :
-             isRelativeURI(id) ? path.join(root, id) : null
+      return isURI(id) ? path.join(root, graph.cachePath, id) :
+             isRelative(id) ? path.join(root, id) : null
     },
     resolveURI: function resolveURI(id) {
-      return isPluginURI(id) ? resolvePluginURI(id) :
-             isRelativeURI(id) ? resolveID(id, graph.uri) : null
+      return isURI(id) ? id : isRelative(id) ? resolve(id, graph.uri) : null
     }
   }
   if (onProgress) onProgress(GET_METADATA, location)
