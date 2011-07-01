@@ -1,26 +1,29 @@
 # graphquire #
 
-Module graph builder. This tool may be used to build module dependency graph
-starting form package's main module. This prototype recognizes two types of
-module ids:
+Web is awesome: cross platform, fully distributed and yet connected via [URL]s.
 
-  1. Relative:  
+This project is an attempt, to apply same principles for building a web itself.
+Idea is to build a fully distributed ecosystem (without any type of central
+authority) of cross platform JavaScript modules connected via URLs. Each module
+doing one thing only, but doing it well! Something to start building [harmony
+of our dreams]!
+
+## Tool ##
+
+This is a module linker / graph builder, that may be used to build module
+dependency graph starting form a package's main module. Graphequire recognizes
+two types of module requirements:
+
+  1. Relative id:
      `require('./foo/bar')`  
      `require('./bla.js')`  
      `require('../baz')`
 
-  2. Absolute:  
-     `require('http!foo.org/bar')`  
-     `require('https!bla.org/baz.js)`
+  2. URL:  
+     `require('http://foo.org/bar')`  
+     `require('https://bla.org/baz.js)`
 
-Notice `http!` prefix in absolute id ? That's a way to define remote
-dependencies. This makes packages obsolete, defining dependencies in the package
-saves few keystrokes but is pretty is unwebby as it brings a lot of complexity
-by introducing nested dependencies, encouraging code duplication instead of
-sharing. Of course we can employ some tools to handle this complexity, but
-maybe absolute URIs are not bad ?! Also public module registry would make this
-a non problem: `require('http!jsm.org/underscore')`.
-
+All other type of require's are assumed to be engine specific and are ignored.
 
 ## Install ##
 
@@ -30,16 +33,17 @@ a non problem: `require('http!jsm.org/underscore')`.
 
 ### NodeJS ##
 
-You can use `graphquire` as npm's install script. This way you can start using
-absolute module id's in nodejs today. All you need to do is:
+You can use `graphquire` to install all URL type modules that your project
+depends on as part of npm's install step. To do so you just need to do
+following:
 
-1. Add `graphquire` to your dev-dependencies in `package.json`:
+1. Add `graphquire` to your `dependencies` in `package.json` file:
 
         "dependencies": {
-          "graphquire": ">=0.6.0"
+          "graphquire": ">=0.7.0"
         }
 
-2. Add install script to your `package.json`:
+2. Add `install` `script` in `package.json` file:
 
         "scripts": {
           "install": "graphquire --clean --write"
@@ -47,13 +51,14 @@ absolute module id's in nodejs today. All you need to do is:
 
 ### Jetpack ###
 
-You can use `graphquire` with jetpack, either via command line or npm's install
-script. In both cases command to execute is following:
+You can use `graphquire` with jetpack:
+
+1. Via command line:
 
         graphquire --clean --write --cache-path ./
 
-If you'd like to use with jetpack via npm just follow nodejs instructions but
-modify install script:
+2. Or via npm, in this case you need to do a same thing as in instructions for
+   node with a difference that `install` script will look slightly different:
 
         "scripts": {
           "install": "graphquire --clean --write --cache-path ./"
@@ -61,9 +66,8 @@ modify install script:
 
 ### Browser ###
 
-There is experimental module loader
-[teleport](https://github.com/Gozala/teleport/blob/experimental/npm-1.x.x/teleport.js)
-allowing you to load all this modules in the browser.
+You can use on of many CommonJS [module loaders](http://jsm.io/jsm.js) for
+browsers.
 
 ### CLI ###
 
@@ -75,45 +79,50 @@ You can use `graphquire` as a command line tool:
         graphquire test/fixtures/pckg1/package.json
 
         {
+           "path": "/Users/gozala/Projects/graphquire/test/fixtures/pckg-cached/package.json",
+           "uri": "./",
            "cachePath": "./node_modules",
-           "location": "/Users/gozala/Projects/graphquire/test/fixtures/pckg1/package.json",
+           "includesSource": true,
            "metadata": {
               "name": "pckg1"
            },
            "modules": {
               "./index.js": {
+                 "id": "./index.js",
                  "requirements": {
-                    "http!foo.org/a": "http!foo.org/a.js"
+                    "http://foo.org/a": "http://foo.org/a.js"
                  }
               },
-              "http!foo.org/a.js": {
-                 "id": "http!foo.org/a.js",
+              "http://foo.org/a.js": {
+                 "id": "http://foo.org/a.js",
                  "requirements": {
-                    "./nested/b": "http!foo.org/nested/b.js"
+                    "./nested/b": "http://foo.org/nested/b.js"
                  }
               },
-              "http!foo.org/nested/b.js": {
-                 "id": "http!foo.org/nested/b.js",
+              "http://foo.org/nested/b.js": {
+                 "id": "http://foo.org/nested/b.js",
                  "requirements": {
-                    "http!bar.org/c": "http!bar.org/c.js"
+                    "http://bar.org/c": "http://bar.org/c.js"
                  }
               },
-              "http!bar.org/c.js": {
-                 "id": "http!bar.org/c.js",
+              "http://bar.org/c.js": {
+                 "id": "http://bar.org/c.js"
               }
            }
         }
 
 
-2. You can also analyze graphs on the remote packages (Please note that source
-   attributes are replaced by ...):
+2. You can also analyze dependency graphs on the remote packages (Output will
+   contain module source if `--no-source` option is not used).
 
-        graphquire https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json
+        graphquire --no-source https://raw.github.com/Gozala/graphquire/master/test/fixtures/pckg-uncached/package.json
 
         {
+           "path": "./",
+           "uri": "https://raw.github.com/Gozala/graphquire/master/test/fixtures/pckg-uncached/package.json",
            "cachePath": "./node_modules",
-           "location": "https://github.com/Gozala/graphquire/raw/master/test/fixtures/pckg2/package.json",
-           "metadata" {
+           "includesSource": false,
+           "metadata": {
               "name": "pckg2",
               "version": "0.0.1",
               "description": "test package with remote dependencies"
@@ -121,37 +130,36 @@ You can use `graphquire` as a command line tool:
            "modules": {
               "./index.js": {
                  "id": "./index.js",
-                 "source": ".....",
                  "requirements": {
-                    "https!github.com/Gozala/models/raw/master/lib/models.js": "https!github.com/Gozala/models/raw/master/lib/models.js"
+                    "https://raw.github.com/Gozala/models/master/models.js": "https://raw.github.com/Gozala/models/master/models.js"
                  }
               },
-              "https!github.com/Gozala/models/raw/master/lib/models.js": {
-                 "id": "https!github.com/Gozala/models/raw/master/lib/models.js",
-                 "source": "....",
+              "https://raw.github.com/Gozala/models/master/models.js": {
+                 "id": "https://raw.github.com/Gozala/models/master/models.js",
                  "requirements": {
-                    "./events": "https!github.com/Gozala/models/raw/master/lib/events.js"
+                    "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js": "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js",
+                    "https!raw.github.com/Gozala/events/v0.2.0/events.js": "https!raw.github.com/Gozala/events/v0.2.0/events.js"
                  }
               },
-              "https!github.com/Gozala/models/raw/master/lib/events.js": {
-                 "id": "https!github.com/Gozala/models/raw/master/lib/events.js",
-                 "source": "....",
-                 "requirements": {
-                    "./extendables": "https!github.com/Gozala/models/raw/master/lib/extendables.js"
-                 }
+              "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js": {
+                 "id": "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js",
+                 "isNative": true
               },
-              "https!github.com/Gozala/models/raw/master/lib/extendables.js": {
-                 "id": "https!github.com/Gozala/models/raw/master/lib/extendables.js",
-                 "source": "....."
+              "https!raw.github.com/Gozala/events/v0.2.0/events.js": {
+                 "id": "https!raw.github.com/Gozala/events/v0.2.0/events.js",
+                 "isNative": true
               }
            }
         }
 
 
-3. Install missing dependencies to the local filesystem:
+3. You can install / cache missing dependencies of your package into filesystem:
 
         graphquire --write path/to/package.json
 
-4. No longer used dependencies can be also cleaned up by additional argument:
+4. Obsolete dependencies can be also cleaned up using additional argument:
 
         graphquire --write --clean path/to/package.json
+
+[URL]:http://en.wikipedia.org/wiki/Uniform_Resource_Locator
+[harmony of our dreams]:http://wiki.ecmascript.org/doku.php?id=harmony:modules
