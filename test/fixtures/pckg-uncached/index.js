@@ -1,2 +1,2 @@
 exports.name = "main";
-exports.dependency = require("https://github.com/Gozala/models/raw/master/lib/models.js");
+exports.dependency = require("https://raw.github.com/Gozala/models/master/models.js");
