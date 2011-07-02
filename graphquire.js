@@ -163,10 +163,13 @@ function getGraph(options, onComplete, onProgress) {
     uri: isURI(location) ? location : './',
     cachePath: options.cachePath || './',
     includesSource: options.includeSource || false,
+    escape: options.escape || false,
     resolvePath: function resolvePath(id) {
       var root = path.dirname(graph.path)
-      return isURI(id) ? path.join(root, graph.cachePath, id) :
-             isRelative(id) ? path.join(root, id) : null
+      return isURI(id) ?
+             path.join(root, graph.cachePath,
+                       graph.escape ? id.replace(/:/, encodeURIComponent) : id)
+             : isRelative(id) ? path.join(root, id) : null
     },
     resolveURI: function resolveURI(id) {
       return isURI(id) ? id : isRelative(id) ? resolve(id, graph.uri) : null

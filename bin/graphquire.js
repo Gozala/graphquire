@@ -23,6 +23,13 @@ function cachePath() {
   var index = params.indexOf('--cache-path')
   return ~index ? params[++index] : './node_modules'
 }
+
+function isEscape() {
+  return params.some(function onEach(param) {
+    return param === '-e' || param === '--escape'
+  })
+}
+
 function isWriting() {
   return params.some(function onEach(param) {
     return param === '-w' || param === '--write'
@@ -81,6 +88,7 @@ var options = {
   cachePath: cachePath(),
   location: getLocation(),
   includeSource: !isNoSource(),
+  escape: isEscape()
 }
 
 graphquire.getGraph(options, function onGraph(error, graph) {

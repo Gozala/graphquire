@@ -18,8 +18,10 @@ var WROTE_MODULE = exports.WROTE_MODULE = 10
 function clean(graph, onComplete, onProgress) {
   var modules = graph.modules
   var root = path.dirname(graph.path)
-  var http = path.join(root, graph.cachePath, 'http!')
-  var https = path.join(root, graph.cachePath, 'https!')
+  var http = path.join(root, graph.cachePath,
+                       graph.escape ? encodeURIComponent('http:') : 'http:')
+  var https = path.join(root, graph.cachePath,
+                        graph.escape ? encodeURIComponent('https:') : 'https:')
   var paths = Object.keys(modules).map(graph.resolvePath.bind(graph))
                                   .map(path.join.bind(path, root))
 
