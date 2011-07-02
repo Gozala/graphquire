@@ -55,13 +55,13 @@ You can use `graphquire` with jetpack:
 
 1. Via command line:
 
-        graphquire --clean --write --cache-path ./
+        graphquire --clean --write --encode --cache-path ./
 
 2. Or via npm, in this case you need to do a same thing as in instructions for
    node with a difference that `install` script will look slightly different:
 
         "scripts": {
-          "install": "graphquire --clean --write --cache-path ./"
+          "install": "graphquire --clean --write --encode --cache-path ./"
         }
 
 ### Browser ###
@@ -160,6 +160,9 @@ You can use `graphquire` as a command line tool:
 4. Obsolete dependencies can be also cleaned up using additional argument:
 
         graphquire --write --clean path/to/package.json
+
+5. Module cache by default is `node_modules` folder but can be set to different
+   value via `--cache-path` argument.
 
 [URL]:http://en.wikipedia.org/wiki/Uniform_Resource_Locator
 [harmony of our dreams]:http://wiki.ecmascript.org/doku.php?id=harmony:modules
