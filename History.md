@@ -1,5 +1,9 @@
 # History #
 
+## 0.7.0 / 2011-07-01 ##
+
+  - Switching to actual URL's instead of 'http!' hacks.
+
 ## 0.6.1 / 2011-06-12 ##
 
   - Adding support for jetpack via `--cache-path ./` property.

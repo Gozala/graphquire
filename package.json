@@ -1,10 +1,10 @@
 {
   "name": "graphquire",
   "id": "graphquire",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "module graph builder and installer.",
   "keywords": [ "dependencies", "graph", "modules", "require", "linker" ],
-  "author": "Irakli Gozalishvili <rfobic@gmail.com>",
+  "author": "Irakli Gozalishvili <rfobic@gmail.com> (http://jeditoolkit.com/)",
   "repository": {
     "type": "git",
     "url": "https://github.com/Gozala/graphquire.git",
@@ -14,13 +14,12 @@
     "web": "http://github.com/Gozala/graphquire/issues/"
   },
   "devDependencies": {
-    "test": ">=0.0.10"
+    "test": ">=0.2.1"
   },
   "main": "./graphquire.js",
   "preferGlobal" : true,
   "engines": {
-    "node": "0.4.x",
-    "teleport": ">=0.2.0"
+    "node": "0.4.x"
   },
   "bin": { "graphquire" : "./bin/graphquire.js" },
   "scripts": {
