@@ -23,23 +23,23 @@ exports['test cached no package dependencies'] = function(assert, done) {
       "./index.js": {
         "id": "./index.js",
         "requirements": {
-          "http://foo.org/a": "http://foo.org/a.js"
+          "foo.org/a": "foo.org/a"
         }
       },
-      "http://foo.org/a.js": {
-        "id": "http://foo.org/a.js",
+      "foo.org/a": {
+        "id": "foo.org/a",
         "requirements": {
-          "./nested/b": "http://foo.org/nested/b.js"
+          "./nested/b": "foo.org/nested/b"
         }
       },
-      "http://foo.org/nested/b.js": {
-        "id": "http://foo.org/nested/b.js",
+      "foo.org/nested/b": {
+        "id": "foo.org/nested/b",
         "requirements": {
-          "http://bar.org/c": "http://bar.org/c.js"
+          "!bar.org/c": "!bar.org/c"
         }
       },
-      "http://bar.org/c.js": {
-        "id": "http://bar.org/c.js",
+      "!bar.org/c": {
+        "id": "!bar.org/c",
       }
     }, 'modules linked correctly')
     done()
@@ -54,28 +54,28 @@ exports['test cached with package dependencies'] = function(assert, done) {
       "./index.js": {
          "id": "./index.js",
          "requirements": {
-            "http://foo.org/a.js": "http://foo.org/a.js",
-            "dependency": "dependency.js"
+            "foo.org/a": "foo.org/a",
+            "dependency": "dependency"
          }
       },
-      "http://foo.org/a.js": {
-         "id": "http://foo.org/a.js",
+      "foo.org/a": {
+         "id": "foo.org/a",
          "requirements": {
-            "./nested/b": "http://foo.org/nested/b.js"
+            "./nested/b": "foo.org/nested/b"
          }
       },
-      "dependency.js": {
-         "id": "dependency.js",
+      "dependency": {
+         "id": "dependency",
          "isNative": true
       },
-      "http://foo.org/nested/b.js": {
-         "id": "http://foo.org/nested/b.js",
+      "foo.org/nested/b": {
+         "id": "foo.org/nested/b",
          "requirements": {
-            "http://bar.org/c": "http://bar.org/c.js"
+            "bar.org/c": "bar.org/c"
          }
       },
-      "http://bar.org/c.js": {
-         "id": "http://bar.org/c.js"
+      "bar.org/c": {
+         "id": "bar.org/c"
       }
     }, 'modules linked correctly')
     done()
@@ -90,29 +90,29 @@ exports['test package with remote modules (SLOW, requires network)'] = function(
       "version": "0.0.1",
       "description": "test package with remote dependencies"
     }, "metadata is correct")
-    assert.deepEqual(graph.modules, {
+    assert.deepEqual(graph.modules, ({
       "./index.js": {
          "id": "./index.js",
          "requirements": {
-            "https://raw.github.com/Gozala/models/master/models.js": "https://raw.github.com/Gozala/models/master/models.js"
+            "!raw.github.com/Gozala/models/v0.2.0/models": "!raw.github.com/Gozala/models/v0.2.0/models"
          }
       },
-      "https://raw.github.com/Gozala/models/master/models.js": {
-         "id": "https://raw.github.com/Gozala/models/master/models.js",
+      "!raw.github.com/Gozala/models/v0.2.0/models": {
+         "id": "!raw.github.com/Gozala/models/v0.2.0/models",
          "requirements": {
-            "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js": "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js",
-            "https!raw.github.com/Gozala/events/v0.2.0/events.js": "https!raw.github.com/Gozala/events/v0.2.0/events.js"
+            "!raw.github.com/Gozala/events/v0.4.0/events": "!raw.github.com/Gozala/events/v0.4.0/events"
          }
       },
-      "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js": {
-         "id": "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js",
-         "isNative": true
+      "!raw.github.com/Gozala/events/v0.4.0/events": {
+         "id": "!raw.github.com/Gozala/events/v0.4.0/events",
+         "requirements": {
+            "!raw.github.com/Gozala/extendables/v0.2.0/extendables": "!raw.github.com/Gozala/extendables/v0.2.0/extendables"
+         }
       },
-      "https!raw.github.com/Gozala/events/v0.2.0/events.js": {
-         "id": "https!raw.github.com/Gozala/events/v0.2.0/events.js",
-         "isNative": true
+      "!raw.github.com/Gozala/extendables/v0.2.0/extendables": {
+         "id": "!raw.github.com/Gozala/extendables/v0.2.0/extendables"
       }
-    }, 'modules linked correctly')
+    }), 'modules linked correctly')
     done()
   })
 }
