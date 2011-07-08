@@ -20,10 +20,11 @@ two types of module requirements:
      `require('../baz')`
 
   2. URL:  
-     `require('http://foo.org/bar')`  
-     `require('https://bla.org/baz.js)`
+     `require('foo.org/bar')        // http://foo.org/bar.js`  
+     `require('!bla.org/baz')       // https://bla.org/baz.js`
 
-All other type of require's are assumed to be engine specific and are ignored.
+All other type of require's are assumed to be engine specific and are left up
+to engine.
 
 ## Install ##
 
@@ -55,13 +56,13 @@ You can use `graphquire` with jetpack:
 
 1. Via command line:
 
-        graphquire --clean --write --encode --cache-path ./
+        graphquire --clean --write --cache-path ./
 
 2. Or via npm, in this case you need to do a same thing as in instructions for
    node with a difference that `install` script will look slightly different:
 
         "scripts": {
-          "install": "graphquire --clean --write --encode --cache-path ./"
+          "install": "graphquire --clean --write --cache-path ./"
         }
 
 ### Browser ###
@@ -76,10 +77,10 @@ You can use `graphquire` as a command line tool:
 1. To analyze dependency graph by running `graphquire` command on the
 `package.json` file of javascript package:
 
-        graphquire test/fixtures/pckg1/package.json
+        graphquire test/fixtures/pckg-cached/package.json
 
         {
-           "path": "/Users/gozala/Projects/graphquire/test/fixtures/pckg-cached/package.json",
+           "path": "test/fixtures/pckg-cached/package.json",
            "uri": "./",
            "cachePath": "./node_modules",
            "includesSource": true,
@@ -90,27 +91,26 @@ You can use `graphquire` as a command line tool:
               "./index.js": {
                  "id": "./index.js",
                  "requirements": {
-                    "http://foo.org/a": "http://foo.org/a.js"
+                    "foo.org/a": "foo.org/a"
                  }
               },
-              "http://foo.org/a.js": {
-                 "id": "http://foo.org/a.js",
+              "foo.org/a": {
+                 "id": "foo.org/a",
                  "requirements": {
-                    "./nested/b": "http://foo.org/nested/b.js"
+                    "./nested/b": "foo.org/nested/b"
                  }
               },
-              "http://foo.org/nested/b.js": {
-                 "id": "http://foo.org/nested/b.js",
+              "foo.org/nested/b": {
+                 "id": "foo.org/nested/b",
                  "requirements": {
-                    "http://bar.org/c": "http://bar.org/c.js"
+                    "!bar.org/c": "!bar.org/c"
                  }
               },
-              "http://bar.org/c.js": {
-                 "id": "http://bar.org/c.js"
+              "!bar.org/c": {
+                 "id": "!bar.org/c"
               }
            }
         }
-
 
 2. You can also analyze dependency graphs on the remote packages (Output will
    contain module source if `--no-source` option is not used).
@@ -131,23 +131,23 @@ You can use `graphquire` as a command line tool:
               "./index.js": {
                  "id": "./index.js",
                  "requirements": {
-                    "https://raw.github.com/Gozala/models/master/models.js": "https://raw.github.com/Gozala/models/master/models.js"
+                    "!raw.github.com/Gozala/models/master/models": "!raw.github.com/Gozala/models/master/models"
                  }
               },
-              "https://raw.github.com/Gozala/models/master/models.js": {
-                 "id": "https://raw.github.com/Gozala/models/master/models.js",
+              "!raw.github.com/Gozala/models/master/models": {
+                 "id": "!raw.github.com/Gozala/models/master/models",
                  "requirements": {
-                    "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js": "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js",
-                    "https!raw.github.com/Gozala/events/v0.2.0/events.js": "https!raw.github.com/Gozala/events/v0.2.0/events.js"
+                    "!raw.github.com/Gozala/events/v0.4.0/events": "!raw.github.com/Gozala/events/v0.4.0/events"
                  }
               },
-              "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js": {
-                 "id": "https!raw.github.com/Gozala/extendables/v0.2.0/extendables.js",
-                 "isNative": true
+              "!raw.github.com/Gozala/events/v0.4.0/events": {
+                 "id": "!raw.github.com/Gozala/events/v0.4.0/events",
+                 "requirements": {
+                    "!raw.github.com/Gozala/extendables/v0.2.0/extendables": "!raw.github.com/Gozala/extendables/v0.2.0/extendables"
+                 }
               },
-              "https!raw.github.com/Gozala/events/v0.2.0/events.js": {
-                 "id": "https!raw.github.com/Gozala/events/v0.2.0/events.js",
-                 "isNative": true
+              "!raw.github.com/Gozala/extendables/v0.2.0/extendables": {
+                 "id": "!raw.github.com/Gozala/extendables/v0.2.0/extendables"
               }
            }
         }
@@ -161,8 +161,9 @@ You can use `graphquire` as a command line tool:
 
         graphquire --write --clean path/to/package.json
 
-5. Module cache by default is `node_modules` folder but can be set to different
-   value via `--cache-path` argument.
+5. You can specify package relative cache path (defaults to `node_modules`):
+
+        graphquire --write --clean --cache-path ./support path/to/package.json
 
 [URL]:http://en.wikipedia.org/wiki/Uniform_Resource_Locator
 [harmony of our dreams]:http://wiki.ecmascript.org/doku.php?id=harmony:modules
