@@ -1,5 +1,11 @@
 # History #
 
+## 0.8.0 / 2011-07-08 ##
+
+  - Change API to use simplified URL pattern:
+    foo.org/module -> http://foo.org/module.js
+    !bar.org/index -> https://bar.org/index.js
+
 ## 0.7.0 / 2011-07-01 ##
 
   - Switching to actual URL's instead of 'http!' hacks.

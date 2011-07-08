@@ -1,7 +1,7 @@
 {
   "name": "graphquire",
   "id": "graphquire",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "module graph builder and installer.",
   "keywords": [ "dependencies", "graph", "modules", "require", "linker" ],
   "author": "Irakli Gozalishvili <rfobic@gmail.com> (http://jeditoolkit.com/)",
@@ -19,7 +19,7 @@
   "main": "./graphquire.js",
   "preferGlobal" : true,
   "engines": {
-    "node": "0.4.x"
+    "node": ">=0.4.x"
   },
   "bin": { "graphquire" : "./bin/graphquire.js" },
   "scripts": {
