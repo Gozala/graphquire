@@ -35,9 +35,6 @@ function extractDependencies(source) {
 function isHttps(id) {
   return id.charAt(0) === '!'
 }
-function toURL(id) {
-  return isHttps(id) ? 'https://' + id.substr(1) : 'http://' + id
-}
 function isPackageLocation(uri) { return path.basename(uri) === "package.json" }
 function normalizePackageLocation(uri) {
   return isPackageLocation(uri) ? uri :
@@ -45,6 +42,9 @@ function normalizePackageLocation(uri) {
 }
 function isRelative(id) { return id && id.charAt(0) === '.' }
 function isURI(uri) { return ~uri.indexOf('://') }
+function toURL(id) {
+  return isURI(id) ? id : isHttps(id) ? 'https://' + id.substr(1) : 'http://' + id
+}
 function isSupported(uri) {
   return !isRelative(uri) && ~uri.indexOf('/') &&
          ~uri.slice(0, uri.indexOf('/')).indexOf('.')
