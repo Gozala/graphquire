@@ -15,22 +15,23 @@ var START_WRITE = exports.START_WRITE = 8
 var WRITE_MODULE = exports.WRITE_MODULE = 9
 var WROTE_MODULE = exports.WROTE_MODULE = 10
 
+
 function clean(graph, onComplete, onProgress) {
   var modules = graph.modules
   var root = path.dirname(graph.path)
-  var http = path.join(root, graph.cachePath,
-                       graph.escape ? encodeURIComponent('http:') : 'http:')
-  var https = path.join(root, graph.cachePath,
-                        graph.escape ? encodeURIComponent('https:') : 'https:')
   var paths = Object.keys(modules).map(graph.resolvePath.bind(graph))
                                   .map(path.join.bind(path, root))
 
   var location = path.join(root, graph.cachePath)
+  if (location.charAt(location.length - 1) !== '/')
+    location = '/' + location
   utils.reduceTree(location, onComplete, function onReduce(entry) {
-    var isNative = !(~entry.indexOf(http) || ~entry.indexOf(https))
+    var id = entry.substr(location.length)
+    var isNative = !graphquire.isSupported(id)
     var isRequired = !paths.every(function(path) {
       return !~path.indexOf(entry)
     })
+
     var isReduced = !isNative && !isRequired
     if (isReduced && onProgress) onProgress(DELETE_PATH, entry)
     return isReduced

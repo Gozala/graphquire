@@ -32,16 +32,25 @@ function extractDependencies(source) {
   return dependencies
 }
 
-function isPackageLocation(uri) { return path.basename(uri) === "package.json" }
-function isURI(uri) {
-  return 0 === uri.indexOf('http:') || 0 === uri.indexOf('https:')
+function isHttps(id) {
+  return id.charAt(0) === '!'
 }
+function toURL(id) {
+  return isHttps(id) ? 'https://' + id.substr(1) : 'http://' + id
+}
+function isPackageLocation(uri) { return path.basename(uri) === "package.json" }
 function normalizePackageLocation(uri) {
   return isPackageLocation(uri) ? uri :
          uri + (uri[uri.length - 1] === "/" ? "" : "/") + "package.json"
 }
 function isRelative(id) { return id && id.charAt(0) === '.' }
-function normalizeURI(uri) { return path.extname(uri) ? uri : uri + '.js' }
+function isURI(uri) { return ~uri.indexOf('://') }
+function isSupported(uri) {
+  return !isRelative(uri) && ~uri.indexOf('/') &&
+         ~uri.slice(0, uri.indexOf('/')).indexOf('.')
+}
+exports.isSupported = isSupported
+function normalize(id) { return path.extname(id) ? id : id + '.js' }
 function resolveID(id, base) {
   var path, paths, last
   if (!isRelative(id)) return id
@@ -61,7 +70,7 @@ function resolveID(id, base) {
   return base.join('/')
 }
 function resolve(id, base) {
-  return normalizeURI(isURI(id) ? id : resolveID(id, base))
+  return isSupported(id) ? id : resolveID(id, base)
 }
 
 function readURL(uri, callback) {
@@ -90,7 +99,7 @@ function getSource(graph, module, onComplete, onProgress) {
       if (!error || error.code !== 'ENOENT' || !uri)
         return onComplete(error, buffer)
       if (onProgress) onProgress(FETCH_URL, uri)
-      readURL(uri, onComplete)
+      readURL(toURL(uri), onComplete)
     })
   } else {
     module.isNative = true
@@ -164,15 +173,14 @@ function getGraph(options, onComplete, onProgress) {
     cachePath: options.cachePath || './',
     includesSource: options.includeSource || false,
     escape: options.escape || false,
-    resolvePath: function resolvePath(id) {
+    resolvePath: options.resolvePath || function resolvePath(id) {
       var root = path.dirname(graph.path)
-      return isURI(id) ?
-             path.join(root, graph.cachePath,
-                       graph.escape ? id.replace(/:/, encodeURIComponent) : id)
-             : isRelative(id) ? path.join(root, id) : null
+      return isSupported(id) ? normalize(path.join(root, graph.cachePath, id))
+             : isRelative(id) ? normalize(path.join(root, id)) : null
     },
-    resolveURI: function resolveURI(id) {
-      return isURI(id) ? id : isRelative(id) ? resolve(id, graph.uri) : null
+    resolveURI: options.resolveURI || function resolveURI(id) {
+      return isSupported(id) ? normalize(id)
+             : isRelative(id) ? normalize(resolve(id, graph.uri)) : null
     }
   }
   if (onProgress) onProgress(GET_METADATA, location)
