@@ -172,7 +172,6 @@ function getGraph(options, onComplete, onProgress) {
     uri: isURI(location) ? location : './',
     cachePath: options.cachePath || './',
     includesSource: options.includeSource || false,
-    escape: options.escape || false,
     resolvePath: options.resolvePath || function resolvePath(id) {
       var root = path.dirname(graph.path)
       return isSupported(id) ? normalize(path.join(root, graph.cachePath, id))
