@@ -1,3 +1,3 @@
 exports.name = "main";
-exports.absolute = require("http://foo.org/a.js");
+exports.absolute = require("foo.org/a");
 exports.dependency = require("dependency");

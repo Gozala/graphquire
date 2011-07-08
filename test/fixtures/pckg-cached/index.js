@@ -1,2 +1,2 @@
 exports.name = "main";
-exports.dependency = require("http://foo.org/a");
+exports.dependency = require("foo.org/a");
