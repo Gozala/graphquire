@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/Gozala/graphquire.png)](http://travis-ci.org/Gozala/graphquire)
 # graphquire #
 
 Web is awesome: cross platform, fully distributed and yet connected via [URL]s.
